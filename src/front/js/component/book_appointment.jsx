@@ -33,7 +33,7 @@ export const BookAppointment = () => {
 
   return (
     <>
-      <h1 className="calendar-title text-start ms-5 ">Manage Availability</h1>
+      <h1 className="calendar-title text-start mt-4 mb-3 ms-4 ">Manage Availability</h1>
       
       <div className="calendar-container">
 
