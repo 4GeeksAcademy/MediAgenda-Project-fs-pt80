@@ -6,176 +6,197 @@
     on that page only (the ones not reused in other pages).
 */
 .home_body {
-    background-color: #f2f0f9;
+  background-color: #f2f0f9;
+  padding: 20px;
+}
+/*Sección Principal*/
+
+/* Hero Section */
+
+.hero-section {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  padding: 50px;
 }
 
-.home-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 20px 40px;
-  }
-  
-  .logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: #624af2; /* Color del logo */
-  }
-  
-  .nav-menu a {
-    margin: 0 15px;
-    text-decoration: none;
-    color: #333;
-  }
-  
-  .nav-menu .btn-login,
-  .nav-menu .btn-register {
-    margin-left: 10px;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-  }
-  
-  .btn-register {
-    background-color: #624af2;
-    color: #fff;
-  }
-  
+.hero-text {
+  flex: 1 1 40%;
+  max-width: 100%;
+  padding: 20px;
+  color: #624af2;
+}
+
+.hero-text h1 {
+  font-size: 2.5rem;
+  color:#3e2f9c;
+}
+
+.hero-image {
+  flex: 1 1 50%;
+  max-width: 100%;
+  padding: 20px;
+  text-align: center;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* What do we do? */
+.what-we-do {
+  text-align: center;
+  padding: 20px;
+}
+
+.what-we-do h2 {
+  margin-bottom: 20px;
+  color: #3e2f9c;
+}
+
+.what-we-do p {
+  color: #624af2;
+}
+
+/* Carousel */
+.professional-slide {
+  padding: 40px 20px;
+  margin: 40px auto;
+  max-width: 1200px;
+  border-radius: 15px;
+}
+
+.carousel-item {
+  padding: 20px;
+  text-align: center;
+}
+
+.image-container {
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+  border-radius: 20%;
+  overflow: hidden;
+  border: 4px solid #3e2f9c;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.carousel-caption {
+  position: static;
+  padding: 20px 0;
+  color: #3e2f9c;
+}
+
+.carousel-caption h5 {
+  font-size: 1.5rem;
+  color:  #3e2f9c;
+  margin: 15px 0;
+}
+
+.carousel-caption p {
+  color: #624af2;
+  font-size: 1rem;
+}
+
+/* Controles de navegación */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(30%) sepia(90%) saturate(1500%) hue-rotate(230deg);
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+/* Find Your Doctor */
+.find-doctor {
+  text-align: center;
+  padding: 40px;
+}
+
+.find-doctor h2 {
+  font-size: 1.8rem;
+  color: #3e2f9c;
+}
+
+.search-bar {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-input {
+  padding: 10px;
+  border: 2px solid  #3e2f9c;
+  border-radius: 5px 0 0 5px;
+  outline: none;
+  font-size: 1rem;
+}
+
+.search-button {
+  padding: 10px 20px;
+  background-color:  #3e2f9c;
+  color: #fff;
+  border: none;
+  border-radius: 0 5px 5px 0;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Medical Suggestions */
+.medical-suggestions {
+  text-align: center;
+  padding: 40px;
+}
+
+.medical-suggestions h2 {
+  font-size: 1.8rem;
+  color:  #3e2f9c;
+}
+
+.suggestion {
+  font-size: 1.2rem;
+  color: #333;
+  margin-top: 20px;
+  padding: 20px;
+  border-left: 5px solid #3e2f9c;
+  border-right: 5px solid #3e2f9c;
+  font-style: italic;
+}
+
+
+/* Media Queries */
+@media (max-width: 768px) {
   .hero-section {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 50px;
-  }
-  
-  .hero-text h1 {
-    font-size: 2.5rem;
-    color: #624af2;
-  }
-  
-  .hero-image img {
-    max-width: 100%;
-  }
-  
-  .carousel {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  
-  .carousel-items {
-    display: flex;
-    overflow-x: scroll;
-  }
-  
-  .carousel-item {
-    text-align: center;
-    margin: 0 10px;
-  }
-  
-  .btn-appointment,
-  .btn-find-doctor {
-    padding: 10px 20px;
-    background-color: #624af2;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+      flex-direction: column;
   }
 
-  /* Find Your Doctor */
-.find-doctor {
-    text-align: center;
-    padding: 40px;
+  .hero-text,
+  .hero-image {
+      padding: 10px;
   }
-  
-  .find-doctor h2 {
-    font-size: 1.8rem;
-    color: #624af2;
+
+  .carousel {
+      flex-direction: column;
   }
-  
-  .search-bar {
-    margin-top: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+
+  .find-doctor {
+      padding: 20px;
   }
-  
-  .search-input {
-    padding: 10px;
-    border: 2px solid #624af2;
-    border-radius: 5px 0 0 5px;
-    outline: none;
-    font-size: 1rem;
-  }
-  
-  .search-button {
-    padding: 10px 20px;
-    background-color: #624af2;
-    color: #fff;
-    border: none;
-    border-radius: 0 5px 5px 0;
-    cursor: pointer;
-    font-size: 1rem;
-  }
-  
-  /* Medical Suggestions */
+
   .medical-suggestions {
-    text-align: center;
-    padding: 40px;
+      padding: 20px;
   }
-  
-  .medical-suggestions h2 {
-    font-size: 1.8rem;
-    color: #624af2;
-  }
-  
-  .suggestion {
-    font-size: 1.2rem;
-    color: #333;
-    margin-top: 20px;
-    padding: 20px;
-    border-left: 5px solid #624af2;
-    border-right: 5px solid #624af2;
-    font-style: italic;
-  }
-  
-  .suggestion footer {
-    margin-top: 10px;
-    font-size: 0.9rem;
-    color: #666;
-  }
-  
-  /* Footer */
-  .home-footer {
-    text-align: center;
-    padding: 20px;
-    background-color: #624af2;
-    color: #fff;
-  }
-  
-  .footer-logo {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
-  
-  .footer-nav {
-    margin-top: 10px;
-  }
-  
-  .footer-nav a {
-    color: #fff;
-    text-decoration: none;
-    margin: 0 15px;
-  }
-  
-  .footer-nav a:hover {
-    text-decoration: underline;
-  }
-  
-  .home-footer p {
-    margin-top: 10px;
-    font-size: 0.9rem;
-  }
+}

@@ -14,6 +14,7 @@ import "../styles/register.css";
 import "../styles/editinformation.css";
 
 
+import "../styles/home.css";
 
 
 //import your own components
