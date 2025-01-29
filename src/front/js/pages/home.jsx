@@ -1,40 +1,14 @@
-<<<<<<< HEAD
-import React, { useContext } from "react";
-import { Context } from "../store/appContext";
-import rigoImageUrl from "../../img/rigo-baby.jpg";
-import "../../styles/home.css"
-import { Calendly } from "../component/Calendly.jsx";
-=======
 import React from "react";
 import group21Image from "../../img/Group 21.png";
-import image15 from "../../img/image 15.png";
+import image15 from "../../img/.png";
 import image16 from "../../img/image 16.png";
 import image17 from "../../img/image 17.png";
->>>>>>> 9a8b0b31c6e5da204244648991a07ae741214057
 
 
 export const Home = () => {
   return (
     <div className="home_body">
-<<<<<<< HEAD
-      //Cabecera
-
-      <Calendly />
-
-      <header className="home-header">
-        <div className="logo">MEDIAGENDA</div>
-        <nav className="nav-menu">
-          <a href="#about-us">About us</a>
-          <a href="#support">Support</a>
-          <button className="btn-login">Login</button>
-          <button className="btn-register">Register</button>
-        </nav>
-      </header>
-
-      //Sección Principal
-=======
       {/* Sección Principal */}
->>>>>>> 9a8b0b31c6e5da204244648991a07ae741214057
       <section className="hero-section">
         <div className="hero-text">
           <h1>Schedule your appointment easily</h1>
