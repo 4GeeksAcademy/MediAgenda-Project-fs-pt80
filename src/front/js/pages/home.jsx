@@ -2,12 +2,16 @@ import React, { useContext } from "react";
 import { Context } from "../store/appContext";
 import rigoImageUrl from "../../img/rigo-baby.jpg";
 import "../../styles/home.css"
+import { Calendly } from "../component/Calendly.jsx";
 
 
 export const Home = () => {
   return (
     <div className="home_body">
       //Cabecera
+
+      <Calendly />
+
       <header className="home-header">
         <div className="logo">MEDIAGENDA</div>
         <nav className="nav-menu">
