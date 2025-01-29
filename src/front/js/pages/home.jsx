@@ -1,8 +1,8 @@
 import React from "react";
 import group21Image from "../../img/Group 21.png";
-import image15 from "../../img/.png";
-import image16 from "../../img/image 16.png";
-import image17 from "../../img/image 17.png";
+import image15 from "../../img/doctor2.png";
+import image16 from "../../img/doctor5.png";
+import image17 from "../../img/doctor6.png";
 
 
 export const Home = () => {
@@ -10,17 +10,31 @@ export const Home = () => {
     <div className="home_body">
       {/* Sección Principal */}
       <section className="hero-section">
-        <div className="hero-text">
-          <h1>Schedule your appointment easily</h1>
-          <p>
-            We are here to make healthcare easier, because every visit counts and
-            every patient matters.
-          </p>
-          <button className="btn-appointment">Take an Appointment</button>
-        </div>
-        <div className="hero-image">
+        <div className="container">
+          <div className="row">
+            <div className="col-sm-12 col-md-7 col-lg-7">
+              <div className="hero-text">
+                <h1>Schedule your appointment easily</h1>
+                <p>
+                 We are here to make healthcare easier, because every visit counts and
+                 every patient matters.
+                </p>
+                <button className="btn-appointment">Take an Appointment</button>
+              </div>
+            </div>
+          </div>
+          <div className="col-sm-12 col-md-5 col-lg-5">
+          <div className="hero-image d-flex">
           <img src={group21Image} alt="Laptop with calendar" />
+          <div className="degradado-hero-img">
+
+          </div>
         </div>
+          </div>
+
+        </div>
+
+
       </section>
 
       {/* Sección "What do we do?" */}
