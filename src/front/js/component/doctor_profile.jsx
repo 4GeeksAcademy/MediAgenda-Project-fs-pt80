@@ -26,7 +26,7 @@ export const Doctor = () => {
     });
     useEffect(() => {
         actions.getProfile();
-        actions.fetchAppointments();
+        //actions.fetchAppointments();
     }, []);
 
     useEffect(() => {

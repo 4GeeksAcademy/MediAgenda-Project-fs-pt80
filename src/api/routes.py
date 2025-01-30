@@ -413,7 +413,6 @@ def cancel_calendly_appointment(appointment_id):
 #     except Exception as e:
 #         return jsonify({"error": str(e)}), 500
 
-<<<<<<< HEAD
 # @api.route('/citas/actualizar/<int:id>', methods=['PUT'])
 # @jwt_required()
 # def actualizar_cita(id):
@@ -424,7 +423,6 @@ def cancel_calendly_appointment(appointment_id):
 #         if not cita or cita.paciente_id != current_user:
 #             return jsonify({"error": "No autorizado"}), 403
 
-=======
 # @api.route('/disponibilidad', methods=['POST'])
 # @jwt_required()
 # def crear_disponibilidad():
@@ -625,7 +623,6 @@ def cancel_calendly_appointment(appointment_id):
 #         if not cita or cita.paciente_id != current_user:
 #             return jsonify({"error": "No autorizado"}), 403
 
->>>>>>> 9de6cc76960558c04dc5ff3f08e0a7b8aed6399e
 #         data = request.json
 #         nueva_fecha = data.get('fecha', cita.appointment_date)
 #         nueva_hora = data.get('hora', cita.appointment_time)
