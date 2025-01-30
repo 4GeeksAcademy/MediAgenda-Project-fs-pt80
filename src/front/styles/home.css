@@ -8,6 +8,15 @@
 .home_body {
   /*padding: 20px;*/
 }
+.cuadrado{
+  width: 287px;
+  height: 400px;
+  
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  background-image: linear-gradient(#3E2F9C, #553CA9, #6445AC, #6F4CB0);
+}
 /*Sección Principal*/
 
 /* Hero Section */
@@ -37,18 +46,12 @@
   max-width: 100%;
   padding: 20px;
   text-align: center;
-  background-color: red;
 }
 
 .hero-image img {
   max-width: 100%;
   height: auto;
-}
-
-.degradado-hero-img {
-  background-color: red;
-  height: 400px;
-  width: 200px;
+  z-index: 1;
 }
 /* What do we do? */
 .what-we-do {

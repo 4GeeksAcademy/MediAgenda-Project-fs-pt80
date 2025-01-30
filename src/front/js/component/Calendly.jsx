@@ -12,7 +12,7 @@ export const Calendly = () => {
 
   return (
     <div className="App">
-      <InlineWidget url="https://calendly.com/javierseiglie/45min" />
+      <InlineWidget url="https://calendly.com/proyectofinalmmediagenda" />
     </div>
   );
 };

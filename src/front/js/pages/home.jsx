@@ -9,7 +9,9 @@ export const Home = () => {
   return (
     <div className="home_body">
       {/* Sección Principal */}
+      
       <section className="hero-section">
+        <div className="cuadrado"></div>
         <div className="container">
           <div className="row">
             <div className="col-sm-12 col-md-7 col-lg-7">
@@ -24,14 +26,10 @@ export const Home = () => {
             </div>
           </div>
           <div className="col-sm-12 col-md-5 col-lg-5">
-          <div className="hero-image d-flex">
-          <img src={group21Image} alt="Laptop with calendar" />
-          <div className="degradado-hero-img">
-
+            <div className="hero-image d-flex">
+              <img src={group21Image} alt="Laptop with calendar" />
+            </div>
           </div>
-        </div>
-          </div>
-
         </div>
 
 
