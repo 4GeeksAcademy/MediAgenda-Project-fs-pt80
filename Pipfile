@@ -4,6 +4,7 @@ url = "https://pypi.org/simple"
 verify_ssl = true
 
 [dev-packages]
+google-auth = "*"
 
 [packages]
 flask = "*"
@@ -20,11 +21,11 @@ flask-admin = "*"
 typing-extensions = "*"
 flask-jwt-extended = "==4.6.0"
 wtforms = "==3.1.2"
-google-api-python-client = "*"
 google-auth = "*"
-google-auth-oauthlib = "*"
 flask-session = "*"
 requests = "*"
+google-auth-oauthlib = "*"
+google-api-python-client = "*"
 
 [requires]
 python_version = "3.10"

@@ -7,6 +7,7 @@ export const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const { store, actions } = useContext(Context);
+    const [isLoading, setIsLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleLogin = async (e) => {
@@ -23,10 +24,10 @@ export const Login = () => {
     };
 
     return (
-        <>
+        <div className="login-body">
             <div className="row">
-                <div className="col-6 mb-3">
-                    <h3 className="login-title">Login</h3>
+                <div className="col-lg-12 col-md-12 col-sm-12">
+                <h2 className="login-title">Login</h2>
                 </div>
             </div>
             <div className="d-flex justify-content-center align-items-center vh-100">
@@ -62,8 +63,10 @@ export const Login = () => {
                             </div>
                             <button
                                 type="submit"
-                                className="btn btn-primary login-button">
-                                Log in
+                                className="btn btn-primary login-button"
+                                disabled={isLoading}
+                            >
+                                {isLoading ? "Logging in..." : "Log in"}
                             </button>
                             <p className="text-center mt-3">
                                 <span className="register-warning">
@@ -79,7 +82,7 @@ export const Login = () => {
                     </div>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
 

@@ -34,33 +34,37 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             login: async (email, password) => {
-                try {
-                    setStore({ loading: true, error: null });
-
-                    const resp = await fetch(`${process.env.BACKEND_URL}/api/login`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ email, password }),
-                    });
-
-                    if (resp.ok) {
-                        const data = await resp.json();
-                        setStore({
-                            user: data.user,
-                            token: data.token,
-                            role: data.user.paciente ? "paciente" : "especialista",
-                            loading: false,
-                        });
-                        localStorage.setItem("token", data.token);
-                    } else {
-                        setStore({ loading: false, error: "Credenciales inválidas." });
-                    }
-                } catch (error) {
-                    setStore({ loading: false, error: "Error en el login." });
-                    console.error("Error:", error);
-                }
-            },
-
+              try {
+                  setStore({ loading: true, error: null });
+          
+                  const resp = await fetch(`${process.env.BACKEND_URL}/api/login`, {
+                      method: "POST",
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email, password }),
+                  });
+          
+                  if (resp.ok) {
+                      const data = await resp.json();
+                      setStore({
+                          user: data.user,
+                          token: data.token,
+                          role: data.user.paciente ? "paciente" : "especialista",
+                          loading: false,
+                      });
+          
+                      localStorage.setItem("token", data.token);
+                      
+                      return data.user;
+                  } else {
+                      setStore({ loading: false, error: "Credenciales inválidas." });
+                      return null;
+                  }
+              } catch (error) {
+                  setStore({ loading: false, error: "Error en el login." });
+                  console.error("Error:", error);
+                  return null;
+              }
+          },
             logout: () => {
                 setStore({ user: null, token: null, role: null });
                 localStorage.removeItem("token");

@@ -17,6 +17,10 @@ import { Register } from "./component/register.jsx";
 import { Modals } from "./component/editinformation.jsx";
 import { Profile } from "./pages/profile.jsx";
 import { BookAppointment } from "./component/book_appointment.jsx";
+import { Calendar } from "./component/calendar.jsx";
+
+
+
 import { TestInterface } from "./component/test.jsx";
 
 
@@ -41,7 +45,8 @@ const Layout = () => {
                         <Route element={<Single />} path="/single/:theid" />
                         <Route element={<Modals />} path="/editinformation" />
                         <Route element={<Profile />} path="/profile" />
-                        <Route element={<BookAppointment />} path="/book_appointment" /> 
+                        <Route element={<BookAppointment />} path="/book_appointment" />
+                        <Route element={<Calendar />} path="/calendar" /> 
                         <Route element={<TestInterface />} path="/test" />
                         {/* <Route element={<Register />} path="/register" /> */}
                         <Route element={<h1>Not found!</h1>} />

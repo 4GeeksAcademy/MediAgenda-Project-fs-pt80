@@ -12,6 +12,7 @@ import "../styles/footer.css";
 import "../styles/login.css";
 import "../styles/register.css";
 import "../styles/editinformation.css";
+import "../styles/calendar.css"
 
 
 import "../styles/home.css";

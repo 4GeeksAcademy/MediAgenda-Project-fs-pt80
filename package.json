@@ -73,10 +73,14 @@
 		]
 	},
 	"dependencies": {
+<<<<<<< HEAD
+		"@fortawesome/fontawesome-free": "^6.7.2",
 		"@fortawesome/fontawesome-svg-core": "^6.7.2",
 		"@fortawesome/free-solid-svg-icons": "^6.7.2",
 		"@fortawesome/react-fontawesome": "^0.2.2",
 		"bootstrap": "^5.3.3",
+=======
+>>>>>>> c3e12436edceb038cb971c1db3a5d69846f3366e
 		"prop-types": "^15.6.1",
 		"react": "^16.8.4",
 		"react-calendly": "^4.3.1",

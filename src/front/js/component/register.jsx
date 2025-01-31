@@ -4,41 +4,40 @@ import { useContext } from "react";
 import { Context } from "../store/appContext";
 
 export const Register = () => {
-    const [firstName, setFirstName] = useState("");
-    const [lastName, setLastName] = useState("");
-    const [phone, setPhone] = useState("");
+    const [nombre, setNombre] = useState("");
+    const [apellido, setApellido] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [profileType, setProfileType] = useState("");
-    const [specialistType, setSpecialistType] = useState("");
-    const [licenseNumber, setLicenseNumber] = useState("");
+    const [paciente, setPaciente] = useState("");
+    const [especialidades, setEspecialidades] = useState("");
+    const [numero_colegiatura, setNumeroColegiatura] = useState("");
     const { actions, store } = useContext(Context);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-    
+
+        const esPaciente = paciente === "Patient";
+
         const userData = {
-            firstName,
-            lastName,
-            phone,
-             email,
-            password, 
-            profileType,
-            specialistType: profileType === "Doctor" ? specialistType : null,
-            licenseNumber: profileType === "Doctor" ? licenseNumber :null
-        }; 
-    
-        try  {
-            await  actions.register(userData);
-    
+            nombre,
+            apellido,
+            email,
+            password,
+            paciente: esPaciente,
+            especialidades: !esPaciente ? especialidades : null, 
+            numero_colegiatura: !esPaciente ? numero_colegiatura : null
+        };
+
+        try {
+            await actions.register(userData);
+
             if (!store.error) {
-                navigate("/profile");
+                navigate("/login");
             } else {
                 alert(store.error || "Registration failed. Please try again.");
             }
-        } 
-        catch (error) {
+        } catch (error) {
             alert("An error occurred during registration.");
         }
     };
@@ -51,38 +50,27 @@ export const Register = () => {
                     <form onSubmit={handleSubmit}>
                         <div className="row">
                             <div className="col-6 mb-3">
-                                <label htmlFor="firstName" className="doctor-register-label">First Name:</label>
+                                <label htmlFor="nombre" className="doctor-register-label">First Name:</label>
                                 <input
                                     type="text"
                                     className="doctor-register-input"
-                                    id="firstName"
+                                    id="nombre"
                                     placeholder="First Name"
-                                    value={firstName}
-                                    onChange={(e) => setFirstName(e.target.value)}
+                                    value={nombre}
+                                    onChange={(e) => setNombre(e.target.value)}
                                 />
                             </div>
                             <div className="col-6 mb-3">
-                                <label htmlFor="lastName" className="doctor-register-label">Last Name:</label>
+                                <label htmlFor="apellido" className="doctor-register-label">Last Name:</label>
                                 <input
                                     type="text"
                                     className="doctor-register-input"
-                                    id="lastName"
+                                    id="apellido"
                                     placeholder="Last Name"
-                                    value={lastName}
-                                    onChange={(e) => setLastName(e.target.value)}
+                                    value={apellido}
+                                    onChange={(e) => setApellido(e.target.value)}
                                 />
                             </div>
-                        </div>
-                        <div className="mb-3">
-                            <label htmlFor="phone" className="doctor-register-label">Phone:</label>
-                            <input
-                                type="tel"
-                                className="doctor-register-input"
-                                id="phone"
-                                placeholder="+44 1234 56 78 99"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                            />
                         </div>
                         <div className="mb-3">
                             <label htmlFor="email" className="doctor-register-label">Email:</label>
@@ -107,28 +95,28 @@ export const Register = () => {
                             />
                         </div>
                         <div className="mb-3">
-                            <label htmlFor="profileType" className="doctor-register-label">Profile Type:</label>
+                            <label htmlFor="paciente" className="doctor-register-label">Profile Type:</label>
                             <select
-                                id="profileType"
+                                id="paciente"
                                 className="doctor-register-input"
-                                value={profileType}
-                                onChange={(e) => setProfileType(e.target.value)}
+                                value={paciente}
+                                onChange={(e) => setPaciente(e.target.value)}
                             >
-                                <option value="">Profile Type</option>
+                                <option value="">Select Profile</option>
                                 <option value="Patient">Patient</option>
                                 <option value="Doctor">Doctor</option>
                             </select>
                         </div>
 
-                        {profileType === "Doctor" && (
+                        {paciente === "Doctor" && (
                             <>
                                 <div className="mb-3">
-                                    <label htmlFor="specialistType" className="doctor-register-label">Specialist type:</label>
+                                    <label htmlFor="especialidades" className="doctor-register-label">Specialist type:</label>
                                     <select
-                                        id="specialistType"
+                                        id="especialidades"
                                         className="doctor-register-input"
-                                        value={specialistType}
-                                        onChange={(e) => setSpecialistType(e.target.value)}
+                                        value={especialidades}
+                                        onChange={(e) => setEspecialidades(e.target.value)}
                                     >
                                         <option value="">Select Speciality</option>
                                         <option value="Dermatologist">Dermatologist</option>
@@ -137,14 +125,14 @@ export const Register = () => {
                                     </select>
                                 </div>
                                 <div className="mb-3">
-                                    <label htmlFor="licenseNumber" className="doctor-register-label">Number specialist license:</label>
+                                    <label htmlFor="numero_colegiatura" className="doctor-register-label">License Number:</label>
                                     <input
                                         type="text"
                                         className="doctor-register-input"
-                                        id="licenseNumber"
+                                        id="numero_colegiatura"
                                         placeholder="123456789XXX"
-                                        value={licenseNumber}
-                                        onChange={(e) => setLicenseNumber(e.target.value)}
+                                        value={numero_colegiatura}
+                                        onChange={(e) => setNumeroColegiatura(e.target.value)}
                                     />
                                 </div>
                             </>
