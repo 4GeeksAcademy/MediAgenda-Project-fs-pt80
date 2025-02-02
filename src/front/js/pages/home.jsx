@@ -105,7 +105,7 @@ export const Home = () => {
 </section>
 
       {/* Sección "Find Your Doctor" */}
-      <section className="find-doctor">
+      <section className="find-doctor py-5">
         <h2>Find Your Doctor</h2>
         <div className="search-bar">
           <input type="text" placeholder="Orangel Hernandez" className="search-input" />
