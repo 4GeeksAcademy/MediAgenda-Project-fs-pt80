@@ -5,12 +5,6 @@
     one more css for each page that will contain the selected used 
     on that page only (the ones not reused in other pages).
 */
-.home_body {
-  /*padding: 20px;*/
-}
-/*Sección Principal*/
-
-/* Hero Section */
 
 .hero-section {
   background-color: #CDC7ED;
@@ -177,21 +171,28 @@
 }
 
 .search-input {
+  width: 30%;
   padding: 10px;
-  border: 2px solid  #3e2f9c;
-  border-radius: 5px 0 0 5px;
+  border: 2px solid  #CDC7ED;
+  background-color: #CDC7ED;
+  border-radius: 20px 0 0 20px;
   outline: none;
   font-size: 1rem;
 }
 
 .search-button {
-  padding: 10px 20px;
+  width: 5%;
+  padding: 12px 20px;
   background-color:  #3e2f9c;
-  color: #fff;
   border: none;
-  border-radius: 0 5px 5px 0;
+  border-radius: 0 20px 20px 0;
   cursor: pointer;
   font-size: 1rem;
+}
+
+.custom-color {
+  color: #877EC2;
+
 }
 
 /* Medical Suggestions */
@@ -207,11 +208,9 @@
 
 .suggestion {
   font-size: 1.2rem;
-  color: #333;
+  color: #624af2;
   margin-top: 20px;
   padding: 20px;
-  border-left: 5px solid #3e2f9c;
-  border-right: 5px solid #3e2f9c;
   font-style: italic;
 }
 
