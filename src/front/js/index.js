@@ -14,9 +14,8 @@ import "../styles/register.css";
 import "../styles/editinformation.css";
 import "../styles/calendar.css"
 
-
 import "../styles/home.css";
-
+import "../styles/suppor.css"
 
 //import your own components
 import Layout from "./layout";
