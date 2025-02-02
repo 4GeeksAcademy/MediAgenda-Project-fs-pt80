@@ -242,3 +242,22 @@ body {
 }
 
 
+.available-date {
+  background-color: #ffdd57 !important;
+  border-radius: 50%;
+}
+.patient-calendar-container {
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.alert {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  margin: 10px auto;
+  width: 50%;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}

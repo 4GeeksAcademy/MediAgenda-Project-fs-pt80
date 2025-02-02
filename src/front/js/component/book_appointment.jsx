@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "../../styles/BookAppointment.css";
+import { DoctorCalendar } from "./doctor_calendar.jsx";
 
 const daysInMonth = (month, year) => new Date(year, month, 0).getDate();
 
@@ -93,6 +94,7 @@ export const BookAppointment = () => {
           Schedule
         </button>
       </div>
+      <DoctorCalendar />
     </>
   );
 };

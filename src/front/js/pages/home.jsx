@@ -3,9 +3,6 @@ import group21Image from "../../img/laptop.png";
 import image15 from "../../img/doctor9.png";
 import image16 from "../../img/doctor8.png";
 import image17 from "../../img/doctor10.png";
-import DoctorCalendar from "../component/doctor_calendar.jsx";
-import PatientCalendar from "../component/patient_calendar.jsx";
-
 
 
 export const Home = () => {
