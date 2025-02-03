@@ -11,6 +11,7 @@ import PatientCalendar from "../component/patient_calendar.jsx";
 export const Home = () => {
   return (
     <div className="home_body">
+      
       {/* Sección Principal */}
       <section className="hero-section">
       <div className="cuadrado"></div>
