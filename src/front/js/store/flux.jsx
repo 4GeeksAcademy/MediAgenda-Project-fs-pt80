@@ -12,7 +12,7 @@ const getState = ({ getStore, getActions, setStore }) => {
             availability: [],
             googleAuthUrl: "",
         },
-       
+
         actions: {
             register: async (userData) => {
                 try {
@@ -36,37 +36,37 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             login: async (email, password) => {
-              try {
-                  setStore({ loading: true, error: null });
-          
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/login`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email, password }),
-                  });
-          
-                  if (resp.ok) {
-                      const data = await resp.json();
-                      setStore({
-                          user: data.user,
-                          token: data.token,
-                          role: data.user.paciente ? "paciente" : "especialista",
-                          loading: false,
-                      });
-          
-                      localStorage.setItem("token", data.token);
-                      
-                      return data.user;
-                  } else {
-                      setStore({ loading: false, error: "Credenciales inválidas." });
-                      return null;
-                  }
-              } catch (error) {
-                  setStore({ loading: false, error: "Error en el login." });
-                  console.error("Error:", error);
-                  return null;
-              }
-          },
+                try {
+                    setStore({ loading: true, error: null });
+
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password }),
+                    });
+
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        setStore({
+                            user: data.user,
+                            token: data.token,
+                            role: data.user.paciente ? "paciente" : "especialista",
+                            loading: false,
+                        });
+
+                        localStorage.setItem("token", data.token);
+
+                        return data.user;
+                    } else {
+                        setStore({ loading: false, error: "Credenciales inválidas." });
+                        return null;
+                    }
+                } catch (error) {
+                    setStore({ loading: false, error: "Error en el login." });
+                    console.error("Error:", error);
+                    return null;
+                }
+            },
             logout: () => {
                 setStore({ user: null, token: null, role: null });
                 localStorage.removeItem("token");
@@ -104,72 +104,72 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
             googleAuth: async () => {
-              try {
-                  const response = await fetch(`${process.env.BACKEND_URL}/api/auth/google`);
-                  const data = await response.json();
-                  return data.auth_url;
-              } catch (error) {
-                  console.error("Error en la autenticación con Google:", error);
-              }
-          },
+                try {
+                    const response = await fetch(`${process.env.BACKEND_URL}/api/auth/google`);
+                    const data = await response.json();
+                    return data.auth_url;
+                } catch (error) {
+                    console.error("Error en la autenticación con Google:", error);
+                }
+            },
 
-          fetchAvailability: async () => {
-              const { token } = getStore();
-              try {
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
-                      headers: { Authorization: `Bearer ${token}` },
-                  });
+            fetchAvailability: async () => {
+                const { token } = getStore();
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
 
-                  if (resp.ok) {
-                      const data = await resp.json();
-                      setStore({ availability: data });
-                  }
-              } catch (error) {
-                  console.error("Error al obtener disponibilidad:", error);
-              }
-          },
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        setStore({ availability: data });
+                    }
+                } catch (error) {
+                    console.error("Error al obtener disponibilidad:", error);
+                }
+            },
 
-          createAvailability: async (availabilityData) => {
-              const { token } = getStore();
-              try {
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
-                      method: "POST",
-                      headers: {
-                          Authorization: `Bearer ${token}`,
-                          "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(availabilityData),
-                  });
+            createAvailability: async (availabilityData) => {
+                const { token } = getStore();
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(availabilityData),
+                    });
 
-                  if (resp.ok) {
-                      getActions().fetchAvailability();
-                      console.log("Disponibilidad creada con éxito.");
-                  }
-              } catch (error) {
-                  console.error("Error en createAvailability:", error);
-              }
-          },
+                    if (resp.ok) {
+                        getActions().fetchAvailability();
+                        console.log("Disponibilidad creada con éxito.");
+                    }
+                } catch (error) {
+                    console.error("Error en createAvailability:", error);
+                }
+            },
 
-          scheduleAppointment: async (appointmentData) => {
-              const { token } = getStore();
-              try {
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
-                      method: "POST",
-                      headers: {
-                          Authorization: `Bearer ${token}`,
-                          "Content-Type": "application/json",
-                      },
-                      body: JSON.stringify(appointmentData),
-                  });
+            scheduleAppointment: async (appointmentData) => {
+                const { token } = getStore();
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(appointmentData),
+                    });
 
-                  if (resp.ok) {
-                      getActions().fetchAppointments();
-                      console.log("Cita agendada con éxito.");
-                  }
-              } catch (error) {
-                  console.error("Error en scheduleAppointment:", error);
-              }
-          },
+                    if (resp.ok) {
+                        getActions().fetchAppointments();
+                        console.log("Cita agendada con éxito.");
+                    }
+                } catch (error) {
+                    console.error("Error en scheduleAppointment:", error);
+                }
+            },
         },
     };
 };

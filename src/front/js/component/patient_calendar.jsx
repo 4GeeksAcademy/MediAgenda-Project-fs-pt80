@@ -5,92 +5,60 @@ const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_API_KEY;
 const SCOPES = "https://www.googleapis.com/auth/calendar";
 
-const PatientCalendar = () => {
+export const PatientCalendar = () => {
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const [availableSlots, setAvailableSlots] = useState([]);
+  const [calendarUrl, setCalendarUrl] = useState("");
+  const [doctorEmail, setDoctorEmail] = useState("proyectofinalmmediagenda@gmail.com"); // Poner el email del médico
 
   useEffect(() => {
     function start() {
-      gapi.client
-        .init({
-          apiKey: API_KEY,
-          clientId: CLIENT_ID,
-          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-          scope: SCOPES,
-        })
-        .then(() => {
+      gapi.load("client:auth2", async () => {
+        try {
+          await gapi.client.init({
+            apiKey: API_KEY,
+            clientId: CLIENT_ID,
+            discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+            scope: SCOPES,
+          });
+
           const auth = gapi.auth2.getAuthInstance();
           setIsSignedIn(auth.isSignedIn.get());
           auth.isSignedIn.listen(setIsSignedIn);
-        });
-    }
 
-    gapi.load("client:auth2", start);
-  }, []);
-
-  const fetchAvailableSlots = async () => {
-    if (!isSignedIn) return;
-
-    try {
-      const response = await gapi.client.calendar.events.list({
-        calendarId: "primary",
-        timeMin: new Date().toISOString(),
-        showDeleted: false,
-        singleEvents: true,
-        q: "Disponibilidad Médica",
-        orderBy: "startTime",
+          // Usar el email del doctor para obtener su calendario
+          setCalendarUrl(`https://calendar.google.com/calendar/embed?src=${doctorEmail}`);
+        } catch (error) {
+          console.error("Error inicializando gapi:", error);
+        }
       });
-
-      setAvailableSlots(response.result.items || []);
-    } catch (error) {
-      console.error("Error fetching availability: ", error);
     }
-  };
+    start();
+  }, [doctorEmail]);
 
-  const scheduleAppointment = async (slot) => {
-    if (!isSignedIn) return;
-
-    const event = {
-      summary: "Cita Médica",
-      description: "Consulta médica agendada.",
-      start: { dateTime: slot.start.dateTime, timeZone: "Europe/Madrid" },
-      end: { dateTime: slot.end.dateTime, timeZone: "Europe/Madrid" },
-      attendees: [{ email: "doctor@example.com" }, { email: "patient@example.com" }],
-    };
-
-    try {
-      await gapi.client.calendar.events.insert({
-        calendarId: "primary",
-        resource: event,
-      });
-
-      fetchAvailableSlots();
-    } catch (error) {
-      console.error("Error scheduling appointment: ", error);
-    }
+  const handleSignOut = () => {
+    gapi.auth2.getAuthInstance().signOut().then(() => {
+      setIsSignedIn(false);
+      setCalendarUrl("");
+    });
   };
 
   return (
-    <div>
-      <h2>Patient's Booking</h2>
-      {!isSignedIn ? (
-        <button onClick={() => gapi.auth2.getAuthInstance().signIn()}>Sign In with Google</button>
-      ) : (
+    <div className="patient-calendar-container">
+      <h2>Patient Calendar</h2>
+
+      {isSignedIn ? (
         <>
-          <button onClick={fetchAvailableSlots}>Refresh Available Slots</button>
-          <h3>Available Appointments</h3>
-          <ul>
-            {availableSlots.map((slot) => (
-              <li key={slot.id}>
-                {slot.start.dateTime}
-                <button onClick={() => scheduleAppointment(slot)}>Book</button>
-              </li>
-            ))}
-          </ul>
+          <button onClick={handleSignOut}>Cerrar Sesión</button>
+          <iframe
+            src={calendarUrl}
+            style={{ border: "0", width: "100%", height: "600px" }}
+            frameBorder="0"
+            scrolling="no"
+          ></iframe>
         </>
+      ) : (
+        <button onClick={() => gapi.auth2.getAuthInstance().signIn()}>Iniciar Sesión con Google</button>
       )}
     </div>
   );
 };
-
-export default PatientCalendar;
