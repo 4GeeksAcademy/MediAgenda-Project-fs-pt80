@@ -1,8 +1,10 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import { Link } from "react-router-dom";
 import logo_footer from "../../img/logo_footer.png";
 
-export const Footer = () => (
+export const Footer = () => {
+const navigate = useNavigate();
   <footer className="footer">
     <div className="footer-body">
       <div className="container"> 
@@ -27,4 +29,4 @@ export const Footer = () => (
       </div>
     </div>
   </footer>
-);
+};

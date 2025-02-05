@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router-dom";
 import group21Image from "../../img/laptop.png";
 import image15 from "../../img/doctor9.png";
 import image16 from "../../img/doctor8.png";
@@ -6,6 +7,8 @@ import image17 from "../../img/doctor10.png";
 
 
 export const Home = () => {
+  const navigate = useNavigate();
+  
   return (
     <div className="home_body">
       
