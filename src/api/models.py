@@ -77,7 +77,6 @@ class Especialistas(db.Model):
     numero_colegiatura= db.Column(db.String(9))
     direccion_centro_trabajo = db.Column(db.String(30))
     descripcion = db.Column(db.String(200))
-    calendly = db.Column(db.String(255))
 
     #Relacion disponibilidad del medico
     disponibilidad = db.relationship('DisponibilidadMedico', backref='especialistas', lazy=True)
