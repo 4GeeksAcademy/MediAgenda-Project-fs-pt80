@@ -68,18 +68,18 @@ def register():
         if data['paciente']:
             new_patient = Pacientes(user_id=new_user.id)
             db.session.add(new_patient)
-        else:
-            print("especialista_data:", data.get('especialidades'))
-            new_specialist = Especialistas(
-                user_id=new_user.id,
-                especialidades=data.get('especialidades', None),
-                telefono_oficina=data.get('telefono_oficina', None),
-                clinica=data.get('clinica', None),
-                numero_colegiatura=data.get('numero_colegiatura', None),
-                direccion_centro_trabajo=data.get('direccion_centro_trabajo', None),
-                descripcion=data.get('descripcion', None)
-            )
-            db.session.add(new_specialist)
+       # else:
+       #     print("especialista_data:", data.get('especialidades'))
+       #     new_specialist = Especialistas(
+       #         user_id=new_user.id,
+       #         especialidades=data.get('especialidades', None),
+       #         telefono_oficina=data.get('telefono_oficina', None),
+       #         clinica=data.get('clinica', None),
+       #         numero_colegiatura=data.get('numero_colegiatura', None),
+       #         direccion_centro_trabajo=data.get('direccion_centro_trabajo', None),
+       #         descripcion=data.get('descripcion', None)
+       #     )
+       #     db.session.add(new_specialist)
 
         db.session.commit()
        

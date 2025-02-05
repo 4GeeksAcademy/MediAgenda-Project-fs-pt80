@@ -2,7 +2,7 @@ const getState = ({ getStore, getActions, setStore }) => {
     return {
         store: {
             user: null,
-            token: localStorage.getItem("token") || null,
+            token: localStorage.getItem("token"),
             role: null,
             appointments: [],
             availability: [],
