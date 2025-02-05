@@ -189,7 +189,19 @@ body {
     display: flex;
     flex-direction: column;
 }
-
+.alert-profile{
+    background-color: rgba(111, 76, 176, 0.25) !important;
+    padding: 10px;
+    margin: 10px auto;
+    width: 50%;
+    border-radius: 5px;
+}
+.prof-text-alert{
+    color: white;
+    font-family: 'Alata', serif;
+    font-size: 20px;
+    font-weight: 300;
+}
 
 /* Doctor-profile css */
 /* .doctor-profile .esp-pic {
