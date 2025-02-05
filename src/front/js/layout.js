@@ -22,6 +22,7 @@ import { Calendar } from "./component/calendar.jsx";
 
 
 import { TestInterface } from "./component/test.jsx";
+import { SupportPage } from "./pages/suppor.js";
 
 
 //create your first component
@@ -40,6 +41,7 @@ const Layout = () => {
                     <Routes>
                         <Route element={<Home />} path="/" />
                         <Route element={<Demo />} path="/demo" />
+                        <Route element={<SupportPage />} path="/suppor" />
                         <Route element={<Login />} path="/login" />
                         <Route element={<Register />} path="/register" />
                         <Route element={<Single />} path="/single/:theid" />
