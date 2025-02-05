@@ -1,9 +1,14 @@
 import React, {useState} from "react";
 import logo from "../../img/logo-medi-2.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const NavbarProfile = () => {
     const [isOpen, setIsOpen] = useState(false)
+    const navigate = useNavigate();
+    const handleNavigation = (path) => {
+        navigate(path);
+        setIsOpen(false); // Cierra el menú móvil después de navegar
+    };
     return (
         <>
             <nav className="navbar navbar-expand-lg navbar-light pt-0 pb-0 navbar-principal-classes h-auto">
@@ -20,10 +25,10 @@ export const NavbarProfile = () => {
                                 <Link to="/" className="nav-link nav-text">Support</Link>
                             </li>
                             <div className="nav-btn-container-responsive">
-                                <Link to="/" className="btn custom-btn special_margin" type="submit">
+                                <Link to="/login" className="btn custom-btn special_margin" onclick={()=> handleNavigation("/login")}>
                                     <p>Login</p>
                                 </Link>
-                                <Link to="/" className="btn custom-btn special_margin" type="submit">
+                                <Link to="/register" className="btn custom-btn special_margin" type="submit">
                                     <p>Register</p>
                                 </Link>
                             </div>
@@ -31,10 +36,10 @@ export const NavbarProfile = () => {
                         
                     </div>
                     <li className="nav-btn-container">
-                        <Link to="/" className="btn custom-btn special_margin" type="submit">
+                        <Link to="/login" className="btn custom-btn special_margin" type="submit">
                             <p>Login</p>
                         </Link>
-                        <Link to="/" className="btn custom-btn special_margin" type="submit">
+                        <Link to="/register" className="btn custom-btn special_margin" type="submit">
                             <p>Register</p>
                         </Link>
                     </li>
