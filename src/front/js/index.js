@@ -13,6 +13,7 @@ import "../styles/login.css";
 import "../styles/register.css";
 import "../styles/editinformation.css";
 import "../styles/calendar.css"
+import "../styles/about_us.css"
 
 import "../styles/home.css";
 import "../styles/suppor.css"

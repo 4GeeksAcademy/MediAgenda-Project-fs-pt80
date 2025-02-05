@@ -362,3 +362,52 @@ def agendar_cita():
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+@api.route('/citas', methods=['GET'])
+@jwt_required()
+def list_citas():
+    try:
+        current_user = get_jwt_identity()
+        user = Users.query.get(current_user)
+
+        # Obtener citas de la base de datos
+        if user.paciente:
+            citas_db = Citas.query.filter_by(paciente_id=current_user).all()
+        else:
+            citas_db = Citas.query.filter_by(medico_id=current_user).all()
+        
+        citas_serializadas = [cita.serialize() for cita in citas_db]
+
+       
+        access_token = request.headers.get("Authorization").split("Bearer ")[-1]
+        credentials = Credentials(access_token)
+        service = build("calendar", "v3", credentials=credentials)
+
+       
+        now = datetime.now().isoformat() + "Z" 
+        events_result = service.events().list(
+            calendarId="primary",
+            timeMin=now,
+            singleEvents=True,
+            orderBy="startTime"
+        ).execute()
+
+        events = events_result.get("items", [])
+
+        citas_google = []
+        for event in events:
+            citas_google.append({
+                "google_event_id": event.get("id"),
+                "summary": event.get("summary"),
+                "start": event.get("start").get("dateTime"),
+                "end": event.get("end").get("dateTime"),
+                "attendees": event.get("attendees", [])
+            })
+
+       
+        todas_las_citas = citas_serializadas + citas_google
+
+        return jsonify({"msg": "Citas obtenidas exitosamente", "citas": todas_las_citas}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
