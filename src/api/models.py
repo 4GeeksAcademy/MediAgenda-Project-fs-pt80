@@ -77,6 +77,7 @@ class Especialistas(db.Model):
     numero_colegiatura= db.Column(db.String(9))
     direccion_centro_trabajo = db.Column(db.String(30))
     descripcion = db.Column(db.String(200))
+    calendly = db.Column(db.String(255))
 
     #Relacion disponibilidad del medico
     disponibilidad = db.relationship('DisponibilidadMedico', backref='especialistas', lazy=True)
@@ -130,6 +131,7 @@ class Citas(db.Model):
     notes = db.Column(db.String(250))
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime)
+    
 
     def __repr__(self):
         return f'<Citas {self.id}>'

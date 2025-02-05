@@ -26,7 +26,7 @@ export const PatientProfile = () => {
 
     useEffect(() => {
         actions.getProfile();
-        actions.fetchAppointments();
+        //actions.fetchAppointments();
     }, []);
 
     useEffect(() => {
