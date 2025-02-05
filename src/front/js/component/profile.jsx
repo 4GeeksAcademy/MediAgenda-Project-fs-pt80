@@ -16,13 +16,12 @@ export const PatientProfile = () => {
         telefono: "",
         email: "",
         direccion: "",
-        securityNumber: "",
     });
 
    
     useEffect(() => {
         actions.getProfile();
-        actions.fetchAppointments();
+        // actions.fetchAppointments();
     }, []);
 
     // ✅ Sincronizar datos del store con el estado local
@@ -34,7 +33,7 @@ export const PatientProfile = () => {
                 telefono: store.user.telefono || "",
                 email: store.user.email || "",
                 direccion: store.user.direccion || "",
-                securityNumber: store.user.securityNumber || "",
+               
             });
         }
     }, [store.user]);
@@ -74,12 +73,7 @@ export const PatientProfile = () => {
                                 </div>
                             )}
 
-                            {profileData.securityNumber && (
-                                <div>
-                                    <p className="require-data-title">Social Security Number:</p>
-                                    <p className="require-data-info">{profileData.securityNumber}</p>
-                                </div>
-                            )}
+                            
                         </div>
 
                         <span className="fa-regular fa-pen-to-square prof-edit-icon"
