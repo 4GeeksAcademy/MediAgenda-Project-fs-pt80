@@ -42,6 +42,12 @@ export const PatientProfile = () => {
         setProfileData(updatedData);
         actions.updateProfile(updatedData);
     };
+    useEffect(() => {
+            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+            tooltipTriggerList.forEach(tooltipTriggerEl => {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        }, []); 
 
     return (
         <>
@@ -81,13 +87,13 @@ export const PatientProfile = () => {
                         </span>
                     </div>
                     <div className="dot-states">
-                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Available">
+                        <span data-bs-toggle="tooltip" data-bs-custom-class="tool-status" data-bs-placement="bottom" data-bs-title="Available">
                             <img src={circle_1} alt="circle1" />
                         </span>
-                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Cancelled">
+                        <span data-bs-toggle="tooltip" data-bs-custom-class="tool-status" data-bs-placement="bottom" data-bs-title="Cancelled">
                             <img src={circle_2} alt="circle1" />
                         </span>
-                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Pending">
+                        <span data-bs-toggle="tooltip" data-bs-custom-class="tool-status" data-bs-placement="bottom" data-bs-title="Pending">
                             <img src={circle_3} alt="circle1" />
                         </span>
                     </div>
