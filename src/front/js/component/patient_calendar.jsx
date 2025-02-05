@@ -80,21 +80,23 @@ export const GoogleCalendar = ({ userType }) => {
 
   useEffect(() => {
     function start() {
-      gapi.client
-        .init({
-          apiKey: API_KEY,
-          clientId: CLIENT_ID,
-          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-          scope: SCOPES,
-        })
-        .then(() => {
-          const auth = gapi.auth2.getAuthInstance();
-          setIsSignedIn(auth.isSignedIn.get());
-          auth.isSignedIn.listen(setIsSignedIn);
+        gapi.load("client:auth2", async () => {
+            await gapi.client.init({
+                apiKey: API_KEY,
+                clientId: CLIENT_ID,
+                discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
+                scope: SCOPES,
+            });
+
+            const authInstance = gapi.auth2.getAuthInstance();
+            if (authInstance) {
+                setIsSignedIn(authInstance.isSignedIn.get());
+                authInstance.isSignedIn.listen(setIsSignedIn);
+            }
         });
     }
     gapi.load("client:auth2", start);
-  }, []);
+}, []);
 
   const handleAuthClick = () => {
     gapi.auth2.getAuthInstance().signIn();
@@ -130,8 +132,8 @@ export const GoogleCalendar = ({ userType }) => {
 
     const event = {
       summary: userType === "doctor" ? "Disponibilidad del Doctor" : "Cita Médica",
-      start: { dateTime: start.toISOString(), timeZone: "America/New_York" },
-      end: { dateTime: end.toISOString(), timeZone: "America/New_York" },
+      start: { dateTime: start.toISOString(), timeZone: "Europe/Madrid" },
+      end: { dateTime: end.toISOString(), timeZone: "Europe/Madrid" },
     };
 
     try {
