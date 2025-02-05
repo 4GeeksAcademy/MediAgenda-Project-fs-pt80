@@ -7,6 +7,9 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime, timedelta, timezone
+from google.oauth2.credentials import Credentials
+from google_auth_oauthlib.flow import Flow
+from googleapiclient.discovery import build
 import os
 
 api = Blueprint('api', __name__)
@@ -19,7 +22,7 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 flow = Flow.from_client_secrets_file(
     CLIENT_SECRET_FILE,
     scopes=SCOPES,
-    redirect_uri="https://glowing-succotash-5g4p4995q9vw2v6q6-3001.app.github.dev/redirect"
+    redirect_uri="https://glowing-succotash-5g4p4995q9vw2v6q6-3000.app.github.dev"
 )
 
 
@@ -40,33 +43,33 @@ def register():
         data = request.json
         print("Datos recibidos:", data)
 
-        if not data.get('email') or not data.get('password'):
+        if not data.get('email') or not data.get('password') or not data.get('nombre') or not data.get('apellido'):
             return jsonify({"error": "Datos incompletos"}), 400
 
         existing_user = Users.query.filter_by(email=data['email']).first()
         if existing_user:
             return jsonify({"error": "El usuario ya existe"}), 400
 
-       
+
         new_user = Users(
             nombre=data['nombre'],
             apellido=data['apellido'],
             email=data['email'],
-            password=data['password'],
             paciente=data['paciente'],
             is_active=True
         )
-        new_user.set_password(data['password'])
+
+    
+        new_user.set_password(data['password'])  
+
+
         db.session.add(new_user)
-        db.session.flush()  
+        db.session.commit()  
 
-
-        
         if data['paciente']:
             new_patient = Pacientes(user_id=new_user.id)
             db.session.add(new_patient)
         else:
-            print("especialista_data:", data.get('especialidades'))
             new_specialist = Especialistas(
                 user_id=new_user.id,
                 especialidades=data.get('especialidades', None),
@@ -79,6 +82,7 @@ def register():
             db.session.add(new_specialist)
 
         db.session.commit()
+
        
         access_token = create_access_token(identity=str(new_user.id))
         return jsonify({"msg": "Usuario registrado exitosamente", "token": access_token}), 201
@@ -111,38 +115,75 @@ def login():
         return jsonify({"error": str(e)}), 500
     
 
-@api.route('/profile', methods=['GET'])
+@api.route('/profile', methods=['GET', 'PUT'])
 @jwt_required()
-def get_profile():
+def profile():
     try:
         current_user = get_jwt_identity()
         user = Users.query.get(current_user)
-
         if not user:
             return jsonify({"error": "Usuario no encontrado"}), 404
 
-        
-        if user.paciente:
-          
-            patient_profile = Pacientes.query.filter_by(user_id=user.id).first()
-            if not patient_profile:
-                return jsonify({"error": "Perfil de paciente no encontrado"}), 404
+   
+        if request.method == 'GET':
+            if user.paciente:
+                patient_profile = Pacientes.query.filter_by(user_id=user.id).first()
+                if not patient_profile:
+                    return jsonify({"error": "Perfil de paciente no encontrado"}), 404
 
-            return jsonify({
-                "role": "paciente",
-                "user": user.serialize(),
-                "profile": patient_profile.serialize()
-            }), 200
-        else:
-            
-            specialist_profile = Especialistas.query.filter_by(user_id=user.id).first()
-            if not specialist_profile:
-                return jsonify({"error": "Perfil de especialista no encontrado"}), 404
+                return jsonify({
+                    "role": "paciente",
+                    "user": user.serialize(),
+                    "profile": patient_profile.serialize()
+                }), 200
+            else:
+                specialist_profile = Especialistas.query.filter_by(user_id=user.id).first()
+                if not specialist_profile:
+                    return jsonify({"error": "Perfil de especialista no encontrado"}), 404
 
+                return jsonify({
+                    "role": "especialista",
+                    "user": user.serialize(),
+                    "profile": specialist_profile.serialize()
+                }), 200
+
+        # Si es método PUT, se actualiza la información
+        elif request.method == 'PUT':
+            data = request.get_json()
+            if not data:
+                return jsonify({"error": "No se enviaron datos"}), 400
+
+            # Actualiza campos del usuario (por ejemplo, nombre, apellido y email)
+            user.nombre = data.get('nombre', user.nombre)
+            user.apellido = data.get('apellido', user.apellido)
+            user.email = data.get('email', user.email)
+
+            # Dependiendo del rol, actualizamos la tabla correspondiente
+            if user.paciente:
+                profile_record = Pacientes.query.filter_by(user_id=user.id).first()
+                if not profile_record:
+                    return jsonify({"error": "Perfil de paciente no encontrado"}), 404
+            else:
+                profile_record = Especialistas.query.filter_by(user_id=user.id).first()
+                if not profile_record:
+                    return jsonify({"error": "Perfil de especialista no encontrado"}), 404
+
+            # Actualizamos los campos del perfil
+            profile_record.telefono = data.get('telefono', profile_record.telefono)
+            profile_record.direccion = data.get('direccion', profile_record.direccion)
+            profile_record.securityNumber = data.get('securityNumber', profile_record.securityNumber)
+
+            try:
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                return jsonify({"error": f"Error actualizando el perfil: {str(e)}"}), 500
+
+            # Retorna los datos actualizados
             return jsonify({
-                "role": "especialista",
+                "role": "paciente" if user.paciente else "especialista",
                 "user": user.serialize(),
-                "profile": specialist_profile.serialize()
+                "profile": profile_record.serialize()
             }), 200
 
     except Exception as e:
@@ -320,64 +361,20 @@ def eliminar_disponibilidad(id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-# @api.route('/auth/google', methods=['GET'])
-# def google_auth():
-#     flow = Flow.from_client_secrets_file(
-#         CLIENT_SECRET_FILE, 
-#         scopes=SCOPES, 
-#         redirect_uri= "https://glowing-succotash-5g4p4995q9vw2v6q6-3001.app.github.dev"
-#     )
-    
-#     auth_url, state = flow.authorization_url(prompt="consent")
-  
-#     session["oauth_state"] = state
+@api.route('/citas', methods=['POST'])
+@jwt_required()
+def agendar_cita():
+    try:
+        current_user = get_jwt_identity()
+        data = request.json
+        medico = Especialistas.query.get(data['medico_id'])
+        fecha = data['appointment_date']
+        hora = data['appointment_time']
+        credentials = Credentials(data.get("access_token"))
+        service = build("calendar", "v3", credentials=credentials)
 
-#     return jsonify({"auth_url": auth_url})
-
-
-# @api.route('/auth/google/callback', methods=['GET'])
-# def google_callback():
-#     try:
-#         flow = Flow.from_client_secrets_file(
-#         CLIENT_SECRET_FILE, 
-#         scopes=SCOPES, 
-#         redirect_uri="https://glowing-succotash-5g4p4995q9vw2v6q6-3001.app.github.dev")
-
-#         # if "oauth_state" not in session or session["oauth_state"] != request.args.get("state"):
-#         #     return jsonify({"error": "CSRF Warning! State mismatch."}), 400
-
-#         flow.fetch_token(authorization_response=request.url)
-#         credentials = flow.credentials
-
-#         return jsonify({
-#             "access_token": credentials.token,
-#             "refresh_token": credentials.refresh_token,
-#             "token_uri": credentials.token_uri,
-#             "client_id": credentials.client_id,
-#             "client_secret": credentials.client_secret,
-#         }), 200
-
-#     except Exception as e:
-#         return jsonify({"error": str(e)}), 500
-
-# @api.route('/disponibilidad', methods=['POST'])
-# @jwt_required()
-# def crear_disponibilidad():
-#     try:
-#         current_user = get_jwt_identity()
-#         especialista = Especialistas.query.filter_by(user_id = current_user).first() 
-#         if not especialista: 
-#             return jsonify({'error': 'No autorizado'})
-#         data = request.json
-#         fecha = data.get('fecha')
-#         hora_inicio = data.get('hora_inicio')
-#         hora_final = data.get('hora_final')
-
-#         credentials = Credentials(data.get("access_token"))
-#         service = build("calendar", "v3", credentials=credentials)
-        
-#         start_time = f"{fecha}T{hora_inicio}:00"
-#         end_time = f"{fecha}T{hora_final}:00"
+        start_time = f"{fecha}T{hora}:00"
+        end_time = f"{fecha}T{int(hora.split(':')[0]) + 1}:00"
 
         event_body = {
             "summary": f"Cita con Dr. {medico.user.nombre} {medico.user.apellido}",
@@ -411,7 +408,7 @@ def list_citas():
         current_user = get_jwt_identity()
         user = Users.query.get(current_user)
 
-        # Obtener citas de la base de datos
+       
         if user.paciente:
             citas_db = Citas.query.filter_by(paciente_id=current_user).all()
         else:
@@ -419,12 +416,12 @@ def list_citas():
         
         citas_serializadas = [cita.serialize() for cita in citas_db]
 
-       
+      
         access_token = request.headers.get("Authorization").split("Bearer ")[-1]
         credentials = Credentials(access_token)
         service = build("calendar", "v3", credentials=credentials)
 
-       
+    
         now = datetime.now().isoformat() + "Z" 
         events_result = service.events().list(
             calendarId="primary",
@@ -434,6 +431,7 @@ def list_citas():
         ).execute()
 
         events = events_result.get("items", [])
+
 
         citas_google = []
         for event in events:
@@ -445,7 +443,7 @@ def list_citas():
                 "attendees": event.get("attendees", [])
             })
 
-       
+        
         todas_las_citas = citas_serializadas + citas_google
 
         return jsonify({"msg": "Citas obtenidas exitosamente", "citas": todas_las_citas}), 200
