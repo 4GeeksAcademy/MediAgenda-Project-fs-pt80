@@ -11,11 +11,7 @@ export const Home = () => {
       {/* Sección Principal */}
       
       <section className="hero-section">
-<<<<<<< HEAD
-        <div className="cuadrado"></div>
-=======
       <div className="cuadrado"></div>
->>>>>>> 31d6988ecd761c95fdbf28b6c73eaec33c2849b6
         <div className="container">
           <div className="row">
             <div className="col-sm-12 col-md-7 col-lg-7">
@@ -35,20 +31,11 @@ export const Home = () => {
             <div className="hero-image d-flex">
               <img src={group21Image} alt="Laptop with calendar" />
             </div>
-<<<<<<< HEAD
-<<<<<<< HEAD
-          </div>
-        </div>
-=======
-          </div>
-       </div>
->>>>>>> 31d6988ecd761c95fdbf28b6c73eaec33c2849b6
 
-
-=======
           </div>
        </div>
->>>>>>> ee19ad7e2a9ee6f21291ebc73a4f78a2725fb463
+
+
       </section>
 
       {/* Sección "What do we do?" */}

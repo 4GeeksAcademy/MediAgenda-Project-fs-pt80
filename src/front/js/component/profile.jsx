@@ -10,41 +10,38 @@ import { Link } from "react-router-dom";
 export const PatientProfile = () => {
     const { store, actions } = useContext(Context);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [profileData, setProfileData] = useState(() => {
-        const storedData = localStorage.getItem("profileData");
-        return storedData
-            ? JSON.parse(storedData)
-            : {
-                firstName: "Pepe",
-                lastName: "El Bueno",
-                phoneNumber: "6458889999",
-                email: "pepebue@geeks.com",
-                address: "",
-                securityNumber: ""
-            };
+    const [profileData, setProfileData] = useState({
+        nombre: "",
+        apellido: "",
+        telefono: "",
+        email: "",
+        direccion: "",
     });
 
+   
     useEffect(() => {
         actions.getProfile();
-        //actions.fetchAppointments();
+        // actions.fetchAppointments();
     }, []);
 
+    // ✅ Sincronizar datos del store con el estado local
     useEffect(() => {
-        if (store.profile) {
-            setProfileData(store.profile);
+        if (store.user) {
+            setProfileData({
+                nombre: store.user.nombre || "",
+                apellido: store.user.apellido || "",
+                telefono: store.user.telefono || "",
+                email: store.user.email || "",
+                direccion: store.user.direccion || "",
+               
+            });
         }
-    }, [store.profile]);
+    }, [store.user]);
 
     const updateProfileData = (updatedData) => {
         setProfileData(updatedData);
-        localStorage.setItem("profileData", JSON.stringify(updatedData));
+        actions.updateProfile(updatedData);
     };
-    useEffect(() => {
-        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-        tooltipTriggerList.forEach(tooltipTriggerEl => {
-            new bootstrap.Tooltip(tooltipTriggerEl);
-        });
-    }, []); 
 
     return (
         <>
@@ -55,33 +52,28 @@ export const PatientProfile = () => {
                         <div className="container-info-profile">
                             <div>
                                 <p className="require-data-title">Name:</p>
-                                <p className="require-data-info">{profileData.firstName}</p>
+                                <p className="require-data-info">{profileData.nombre}</p>
                             </div>
                             <div>
                                 <p className="require-data-title">Last Name:</p>
-                                <p className="require-data-info">{profileData.lastName}</p>
+                                <p className="require-data-info">{profileData.apellido}</p>
                             </div>
                             <div>
                                 <p className="require-data-title">Phone Number:</p>
-                                <p className="require-data-info">{profileData.phoneNumber}</p>
+                                <p className="require-data-info">{profileData.telefono}</p>
                             </div>
                             <div>
                                 <p className="require-data-title">Email:</p>
                                 <p className="require-data-info">{profileData.email}</p>
                             </div>
-                            {profileData.address && (
+                            {profileData.direccion && (
                                 <div>
                                     <p className="require-data-title">Address:</p>
-                                    <p className="require-data-info">{profileData.address}</p>
+                                    <p className="require-data-info">{profileData.direccion}</p>
                                 </div>
                             )}
 
-                            {profileData.securityNumber && (
-                                <div>
-                                    <p className="require-data-title">Social Security Number:</p>
-                                    <p className="require-data-info">{profileData.securityNumber}</p>
-                                </div>
-                            )}
+                            
                         </div>
 
                         <span className="fa-regular fa-pen-to-square prof-edit-icon"
@@ -89,13 +81,13 @@ export const PatientProfile = () => {
                         </span>
                     </div>
                     <div className="dot-states">
-                        <span data-bs-toggle="tooltip" data-bs-custom-class="tool-status" data-bs-placement="bottom" data-bs-title="Available">
+                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Available">
                             <img src={circle_1} alt="circle1" />
                         </span>
-                        <span data-bs-toggle="tooltip" data-bs-custom-class="tool-status" data-bs-placement="bottom" data-bs-title="Cancelled">
+                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Cancelled">
                             <img src={circle_2} alt="circle1" />
                         </span>
-                        <span data-bs-toggle="tooltip" data-bs-custom-class="tool-status" data-bs-placement="bottom" data-bs-title="Pending">
+                        <span data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="Pending">
                             <img src={circle_3} alt="circle1" />
                         </span>
                     </div>
@@ -148,4 +140,4 @@ export const PatientProfile = () => {
             )}
         </>
     );
-};
+}; 
