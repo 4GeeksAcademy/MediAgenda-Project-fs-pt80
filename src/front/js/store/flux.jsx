@@ -47,6 +47,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                         const data = await resp.json();
                         setStore({ user: data.user, token: data.token, role: data.user.paciente ? "paciente" : "especialista", loading: false });
                         localStorage.setItem("token", data.token);
+                        getActions().getProfile();
                         return true;
                     }
                 } catch (error) {
@@ -56,26 +57,55 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-            logout: () => {
-                setStore({ user: null, token: null, role: null });
-                localStorage.removeItem("token");
-            },
-
             getProfile: async () => {
                 try {
-                    const token = getStore().token || localStorage.getItem("token");
+                    const store = getStore();
+                    const token = store.token || localStorage.getItem("token");
+                    if (!token) throw new Error("No autenticado");
+
                     const response = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
                         method: "GET",
                         headers: { Authorization: `Bearer ${token}` },
                     });
 
-                    if (!response.ok) throw new Error("Error obteniendo perfil");
+                    if (!response.ok) throw new Error("No se pudo obtener el perfil");
+
                     const data = await response.json();
-                    setStore({ user: data.user, role: data.user.paciente ? "paciente" : "especialista", loading: false });
+                    setStore({ user: data.user });
                 } catch (error) {
-                    console.error("Error en getProfile:", error);
+                    console.error("Error al obtener el perfil:", error);
+                    setStore({ error: "No se pudo cargar el perfil" });
                 }
             },
+            updateProfile: async (updatedData) => {
+                try {
+                  const token = getStore().token;
+                  const response = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
+                    method: "PUT", // o PATCH, dependiendo de la implementación del backend
+                    headers: {
+                      "Content-Type": "application/json",
+                      "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(updatedData)
+                  });
+                  if (!response.ok) throw new Error("Error actualizando perfil");
+                  const data = await response.json();
+                  
+                  setStore({ user: data.user });
+                  return true;
+                } catch (error) {
+                  console.error("Error en updateProfile:", error);
+                  setStore({ error: error.message });
+                  return false;
+                }
+              },
+
+            logout: () => {
+                setStore({ user: null, token: null, role: null });
+                localStorage.removeItem("token");
+            },
+
+            
 
             getGoogleAuthUrl: async () => {
                 try {
@@ -91,17 +121,37 @@ const getState = ({ getStore, getActions, setStore }) => {
             fetchAppointments: async () => {
                 try {
                     const token = getStore().token;
+                    if (!token) throw new Error("No token available");
+            
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
-                        headers: { Authorization: `Bearer ${token}` },
+                        method: "GET",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
                     });
-                    if (!resp.ok) throw new Error("Error obteniendo citas");
+            
+                    if (!resp.ok) {
+                        const errorData = await resp.json();
+                        throw new Error(errorData.error || "Error obteniendo citas");
+                    }
+            
                     const data = await resp.json();
-                    setStore({ appointments: data });
+                    
+                    
+                    const formattedAppointments = data.citas.map(cita => ({
+                        doctorName: cita.summary || `Dr. ${cita.doctor.nombre} ${cita.doctor.apellido}`,
+                        appointment_date: cita.start ? cita.start.split("T")[0] : cita.appointment_date,
+                        appointment_time: cita.start ? cita.start.split("T")[1].slice(0, 5) : cita.appointment_time,
+                        google_event_id: cita.google_event_id || null,
+                    }));
+            
+                    setStore({ appointments: formattedAppointments });
                 } catch (error) {
                     console.error("Error en fetchAppointments:", error);
                 }
             },
-
+            
             createAppointment: async (appointmentData) => {
                 try {
                     const token = getStore().token;
