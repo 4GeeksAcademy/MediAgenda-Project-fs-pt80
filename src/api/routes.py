@@ -7,9 +7,6 @@ from api.utils import generate_sitemap, APIException
 from flask_cors import CORS
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 from datetime import datetime, timedelta, timezone
-from google.oauth2.credentials import Credentials
-from google_auth_oauthlib.flow import Flow
-from googleapiclient.discovery import build
 import os
 
 api = Blueprint('api', __name__)
@@ -22,7 +19,7 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 flow = Flow.from_client_secrets_file(
     CLIENT_SECRET_FILE,
     scopes=SCOPES,
-    redirect_uri="https://glowing-succotash-5g4p4995q9vw2v6q6-3000.app.github.dev"
+    redirect_uri="https://glowing-succotash-5g4p4995q9vw2v6q6-3001.app.github.dev/redirect"
 )
 
 
@@ -364,20 +361,64 @@ def eliminar_disponibilidad(id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
-@api.route('/citas', methods=['POST'])
-@jwt_required()
-def agendar_cita():
-    try:
-        current_user = get_jwt_identity()
-        data = request.json
-        medico = Especialistas.query.get(data['medico_id'])
-        fecha = data['appointment_date']
-        hora = data['appointment_time']
-        credentials = Credentials(data.get("access_token"))
-        service = build("calendar", "v3", credentials=credentials)
+# @api.route('/auth/google', methods=['GET'])
+# def google_auth():
+#     flow = Flow.from_client_secrets_file(
+#         CLIENT_SECRET_FILE, 
+#         scopes=SCOPES, 
+#         redirect_uri= "https://glowing-succotash-5g4p4995q9vw2v6q6-3001.app.github.dev"
+#     )
+    
+#     auth_url, state = flow.authorization_url(prompt="consent")
+  
+#     session["oauth_state"] = state
 
-        start_time = f"{fecha}T{hora}:00"
-        end_time = f"{fecha}T{int(hora.split(':')[0]) + 1}:00"
+#     return jsonify({"auth_url": auth_url})
+
+
+# @api.route('/auth/google/callback', methods=['GET'])
+# def google_callback():
+#     try:
+#         flow = Flow.from_client_secrets_file(
+#         CLIENT_SECRET_FILE, 
+#         scopes=SCOPES, 
+#         redirect_uri="https://glowing-succotash-5g4p4995q9vw2v6q6-3001.app.github.dev")
+
+#         # if "oauth_state" not in session or session["oauth_state"] != request.args.get("state"):
+#         #     return jsonify({"error": "CSRF Warning! State mismatch."}), 400
+
+#         flow.fetch_token(authorization_response=request.url)
+#         credentials = flow.credentials
+
+#         return jsonify({
+#             "access_token": credentials.token,
+#             "refresh_token": credentials.refresh_token,
+#             "token_uri": credentials.token_uri,
+#             "client_id": credentials.client_id,
+#             "client_secret": credentials.client_secret,
+#         }), 200
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
+# @api.route('/disponibilidad', methods=['POST'])
+# @jwt_required()
+# def crear_disponibilidad():
+#     try:
+#         current_user = get_jwt_identity()
+#         especialista = Especialistas.query.filter_by(user_id = current_user).first() 
+#         if not especialista: 
+#             return jsonify({'error': 'No autorizado'})
+#         data = request.json
+#         fecha = data.get('fecha')
+#         hora_inicio = data.get('hora_inicio')
+#         hora_final = data.get('hora_final')
+
+#         credentials = Credentials(data.get("access_token"))
+#         service = build("calendar", "v3", credentials=credentials)
+        
+#         start_time = f"{fecha}T{hora_inicio}:00"
+#         end_time = f"{fecha}T{hora_final}:00"
 
         event_body = {
             "summary": f"Cita con Dr. {medico.user.nombre} {medico.user.apellido}",

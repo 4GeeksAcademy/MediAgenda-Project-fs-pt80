@@ -22,7 +22,11 @@ export const PatientProfile = () => {
    
     useEffect(() => {
         actions.getProfile();
+
         // actions.fetchAppointments();
+
+       
+
     }, []);
     
     
