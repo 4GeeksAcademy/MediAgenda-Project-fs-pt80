@@ -38,6 +38,12 @@ export const Doctor = () => {
         setProfileData(updatedData);
         localStorage.setItem("profileData", JSON.stringify(updatedData));
     };
+    useEffect(() => {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }, []); 
 
     return (
         <>

@@ -2,13 +2,13 @@ const getState = ({ getStore, getActions, setStore }) => {
     return {
         store: {
             user: null,
-            token: null,
+            token: localStorage.getItem("token") || null,
             role: null,
             appointments: [],
             availability: [],
+            googleAuthUrl: "",
             loading: false,
             error: null,
-            calendlyAvailability: [],
         },
 
         actions: {
@@ -22,142 +22,114 @@ const getState = ({ getStore, getActions, setStore }) => {
                     });
 
                     if (resp.ok) {
-                        setStore({ loading: false });
-                        console.log("Registro exitoso.");
-                    } else {
-                        setStore({ loading: false, error: "Error al registrar el usuario." });
+                        const data = await resp.json();
+                        setStore({ token: data.token, loading: false });
+                        localStorage.setItem("token", data.token);
+                        return true;
                     }
                 } catch (error) {
-                    setStore({ loading: false, error: "Error en el registro." });
-                    console.error("Error:", error);
+                    console.error("Error en el registro:", error);
+                    setStore({ error: error.message, loading: false });
+                    return false;
                 }
             },
 
             login: async (email, password) => {
-              try {
-                  setStore({ loading: true, error: null });
-          
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/login`, {
-                      method: "POST",
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email, password }),
-                  });
-          
-                  if (resp.ok) {
-                      const data = await resp.json();
-                      setStore({
-                          user: data.user,
-                          token: data.token,
-                          role: data.user.paciente ? "paciente" : "especialista",
-                          loading: false,
-                      });
-          
-                      localStorage.setItem("token", data.token);
-                      
-                      return data.user;
-                  } else {
-                      setStore({ loading: false, error: "Credenciales inválidas." });
-                      return null;
-                  }
-              } catch (error) {
-                  setStore({ loading: false, error: "Error en el login." });
-                  console.error("Error:", error);
-                  return null;
-              }
-          },
+                try {
+                    setStore({ loading: true, error: null });
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/login`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ email, password }),
+                    });
+
+                    if (resp.ok) {
+                        const data = await resp.json();
+                        setStore({ user: data.user, token: data.token, role: data.user.paciente ? "paciente" : "especialista", loading: false });
+                        localStorage.setItem("token", data.token);
+                        return true;
+                    }
+                } catch (error) {
+                    console.error("Error en el login:", error);
+                    setStore({ error: error.message, loading: false });
+                    return false;
+                }
+            },
+
             logout: () => {
                 setStore({ user: null, token: null, role: null });
                 localStorage.removeItem("token");
             },
 
             getProfile: async () => {
-                const store = getStore();
-                setStore({ loading: true, error: null });
-
                 try {
-                    const token = store.token || localStorage.getItem("token");
-
+                    const token = getStore().token || localStorage.getItem("token");
                     const response = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
                         method: "GET",
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json",
-                        },
+                        headers: { Authorization: `Bearer ${token}` },
                     });
 
-                    if (!response.ok) {
-                        throw new Error("Error al obtener el perfil del usuario.");
-                    }
-
+                    if (!response.ok) throw new Error("Error obteniendo perfil");
                     const data = await response.json();
-                    setStore({
-                        user: data.user,
-                        profile: data.profile,
-                        role: data.role,
-                        loading: false,
-                    });
+                    setStore({ user: data.user, role: data.user.paciente ? "paciente" : "especialista", loading: false });
                 } catch (error) {
                     console.error("Error en getProfile:", error);
                 }
             },
 
-            getCalendlyAvailability: async () => {
-                const { token } = getStore();
+            getGoogleAuthUrl: async () => {
                 try {
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/calendly/availability`, {
-                    headers: { Authorization: `Bearer ${token}` },
-                  });
-        
-                  if (resp.ok) {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/auth/google`);
+                    if (!resp.ok) throw new Error("Error obteniendo Google Auth URL");
                     const data = await resp.json();
-                    setStore({ calendlyAvailability: data });
-                  } else {
-                    console.error("Error al obtener disponibilidad de Calendly.");
-                  }
+                    setStore({ googleAuthUrl: data.auth_url });
                 } catch (error) {
-                  console.error("Error en getCalendlyAvailability:", error);
+                    console.error("Error en getGoogleAuthUrl:", error);
                 }
-              },
-        
-              scheduleCalendlyAppointment: async (doctor_id) => {
-                const { token } = getStore();
+            },
+
+            fetchAppointments: async () => {
                 try {
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/calendly/schedule`, {
-                    method: "POST",
-                    headers: {
-                      Authorization: `Bearer ${token}`,
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({ doctor_id }),
-                  });
-        
-                  if (resp.ok) {
-                    console.log("Cita agendada con éxito en Calendly.");
-                  } else {
-                    console.error("Error al agendar la cita.");
-                  }
+                    const token = getStore().token;
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (!resp.ok) throw new Error("Error obteniendo citas");
+                    const data = await resp.json();
+                    setStore({ appointments: data });
                 } catch (error) {
-                  console.error("Error en scheduleCalendlyAppointment:", error);
+                    console.error("Error en fetchAppointments:", error);
                 }
-              },
-        
-              cancelCalendlyAppointment: async (appointment_id) => {
-                const { token } = getStore();
+            },
+
+            createAppointment: async (appointmentData) => {
                 try {
-                  const resp = await fetch(`${process.env.BACKEND_URL}/api/calendly/cancel/${appointment_id}`, {
-                    method: "DELETE",
-                    headers: { Authorization: `Bearer ${token}` },
-                  });
-        
-                  if (resp.ok) {
-                    console.log("Cita cancelada con éxito en Calendly.");
-                  } else {
-                    console.error("Error al cancelar la cita.");
-                  }
+                    const token = getStore().token;
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
+                        method: "POST",
+                        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+                        body: JSON.stringify(appointmentData),
+                    });
+                    if (!resp.ok) throw new Error("Error creando cita");
+                    getActions().fetchAppointments();
                 } catch (error) {
-                  console.error("Error en cancelCalendlyAppointment:", error);
+                    console.error("Error en createAppointment:", error);
                 }
-              },
+            },
+
+            fetchAvailability: async () => {
+                try {
+                    const token = getStore().token;
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
+                        headers: { Authorization: `Bearer ${token}` },
+                    });
+                    if (!resp.ok) throw new Error("Error obteniendo disponibilidad");
+                    const data = await resp.json();
+                    setStore({ availability: data });
+                } catch (error) {
+                    console.error("Error en fetchAvailability:", error);
+                }
+            },
         },
     };
 };

@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useContext } from "react";
 import { Context } from "../store/appContext";
+import { GoogleCalendar } from "./patient_calendar.jsx";
+// import { PatientCalendar } from "./patient_calendar.jsx";
 
 const specialties = [
   "Allergist",
@@ -366,6 +368,8 @@ export const Calendar = () => {
           </div>
         )}
       </div>
+      {/* <PatientCalendar /> */}
+      <GoogleCalendar />
     </>
   );
 };

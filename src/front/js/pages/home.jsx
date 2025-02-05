@@ -36,6 +36,7 @@ export const Home = () => {
               <img src={group21Image} alt="Laptop with calendar" />
             </div>
 <<<<<<< HEAD
+<<<<<<< HEAD
           </div>
         </div>
 =======
@@ -44,26 +45,28 @@ export const Home = () => {
 >>>>>>> 31d6988ecd761c95fdbf28b6c73eaec33c2849b6
 
 
+=======
+          </div>
+       </div>
+>>>>>>> ee19ad7e2a9ee6f21291ebc73a4f78a2725fb463
       </section>
 
       {/* Sección "What do we do?" */}
       <section className="container py-5">
-  <div className="row align-items-center what-we-do">
-    {/* Título alineado a la izquierda */}
-    <div className="col-md-4 text-md-start text-center">
-      <h2>What do we do?</h2>
-    </div>
-    {/* Párrafo alineado a la derecha */}
-    <div className="col-md-8 text-md-end text-center">
-      <p>
-        We developed a comprehensive solution to manage medical consultations
-        efficiently and securely. We facilitate appointment scheduling, access
-        to medical records, and communication between patients and doctors,
-        optimizing administrative processes for clinics and offices.
-      </p>
-    </div>
-  </div>
-</section> 
+        <div className="row align-items-center what-we-do">
+          <div className="col-md-4 text-md-start text-center">
+            <h2>What do we do?</h2>
+          </div>
+          <div className="col-md-8 text-md-end text-center">
+            <p>
+               We developed a comprehensive solution to manage medical consultations
+               efficiently and securely. We facilitate appointment scheduling, access
+               to medical records, and communication between patients and doctors,
+               optimizing administrative processes for clinics and offices.
+            </p>
+          </div>
+        </div>
+      </section> 
 
 {/* Carrusel de Profesionales */}
 <section className="professional-slide">
@@ -120,7 +123,7 @@ export const Home = () => {
         <h2>Find Your Doctor</h2>
         <div className="search-bar">
           <input type="text" placeholder="Orangel Hernandez" className="search-input" />
-          <button className="search-button">🔍</button>
+          <button className="search-button"><i class="fa-solid fa-magnifying-glass custom-color"></i></button>
         </div>
       </section>
 
