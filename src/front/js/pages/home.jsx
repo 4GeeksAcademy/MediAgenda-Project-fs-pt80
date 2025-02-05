@@ -13,6 +13,7 @@ export const Home = () => {
     <div className="home_body">
       
       {/* Sección Principal */}
+      
       <section className="hero-section">
       <div className="cuadrado"></div>
         <div className="container">
@@ -34,8 +35,11 @@ export const Home = () => {
             <div className="hero-image d-flex">
               <img src={group21Image} alt="Laptop with calendar" />
             </div>
+
           </div>
        </div>
+
+
       </section>
 
       {/* Sección "What do we do?" */}

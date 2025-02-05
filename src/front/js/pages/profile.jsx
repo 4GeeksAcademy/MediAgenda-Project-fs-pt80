@@ -14,6 +14,12 @@ export const Profile = () => {
             actions.getProfile();
         }
     }, []);
+    useEffect(() => {
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }, []);
 
     return (
         <>

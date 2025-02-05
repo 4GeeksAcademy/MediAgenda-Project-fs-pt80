@@ -18,6 +18,7 @@ import { Modals } from "./component/editinformation.jsx";
 import { Profile } from "./pages/profile.jsx";
 import { BookAppointment } from "./component/book_appointment.jsx";
 import { Calendar } from "./component/calendar.jsx";
+import { AboutUs } from "./component/about_us.jsx";
 
 
 
@@ -49,6 +50,7 @@ const Layout = () => {
                         <Route element={<Calendar />} path="/calendar" /> 
                         <Route element={<Footer />} path="/footer" />
                         <Route element={<TestInterface />} path="/test" />
+                        <Route element={<AboutUs />} path="/aboutus" />
                         {/* <Route element={<Register />} path="/register" /> */}
                         <Route element={<h1>Not found!</h1>} />
                     </Routes>
