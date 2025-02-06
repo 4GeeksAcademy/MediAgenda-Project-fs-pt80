@@ -1,6 +1,6 @@
 import React from "react";
 import image18 from "../../img/Group21.png";
-
+import { Footer } from "../component/footer.jsx";
 
 export const SupportPage = () => {
   return (
@@ -22,13 +22,14 @@ export const SupportPage = () => {
 
           <button type="submit">Send</button>
         </form>
+
       </div>
 
       {/* Sección de Vista Previa en Móvil */}
       <div className="mobile-preview">
         <div className="mobile-frame">
           <img src={image18} alt="Mobile Preview" />
-        </div>
+        </div>     
       </div>
     </div>
   );

@@ -1,25 +1,23 @@
 body {
-  font-family: 'gantari', sans-serif;
+  font-family: 'Gantari', sans-serif;
   background-color: rgba(205, 199, 237, 0.25);
 }
 
 .support-container {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: space-between;
   height: 100vh;
+  padding: 40px;
   background-color: #d0c2e8;
-  padding: 20px;
-  gap: 40px;
-  position: relative;
 }
 
 .form-box {
   background-color: #9f86c0;
   border-radius: 15px;
+  margin-left: 20%;
   padding: 30px;
-  width: 450px;
-  height: 525px;
+  width: 550px;
   box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -47,7 +45,7 @@ body {
 
 .form-box button {
   background-color: #2e1a64;
-  color: white;
+  color: #e0d3f0;
   padding: 10px;
   width: 100px;
   border: none;
@@ -66,32 +64,14 @@ body {
 .mobile-preview {
   display: flex;
   justify-content: center;
-  width: 250px;
-  height: 500px;
-  position: relative;
+  align-items: center;
 }
 
 .mobile-frame {
-  flex: 1 1 50%;
-  max-width: 100%;
-  text-align: center;
-  
-
+  transform: translateX(70px);
 }
 
 .mobile-frame img {
-  width: 480px;
-  height: 490px;
-}
-
-
-@media (max-width: 768px) {
-  .support-container {
-    flex-direction: column;
-    gap: 20px;
-  }
-
-  .form-box {
-    width: 90%;
-  }
+  width: 380px;
+  height: 420px;
 }
