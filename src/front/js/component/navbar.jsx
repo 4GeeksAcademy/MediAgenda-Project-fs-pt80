@@ -183,8 +183,8 @@ export const Navbar = () => {
                             </Link>
                         </li>
                         <li className="nav-item">
-                            <Link to="/" className="nav-link nav-text">
-                                Support
+                            <Link to="/suppor"  className="nav-link nav-text">
+                                Support 
                             </Link>
                         </li>
                         <div className="nav-btn-container-responsive">
@@ -213,6 +213,7 @@ export const Navbar = () => {
             </div>
         </nav>
     );
+
 
     return <><>
     {isProfilePage && <ProfileNavbar />}
