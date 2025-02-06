@@ -1,13 +1,34 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import group21Image from "../../img/laptop.png";
 import image15 from "../../img/doctor9.png";
 import image16 from "../../img/doctor8.png";
 import image17 from "../../img/doctor10.png";
 
-
 export const Home = () => {
+  const navigate = useNavigate();
+  const [suggestionIndex, setSuggestionIndex] = useState(0);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const suggestions = [
+    "Excess sodium can increase blood pressure, and high sugar intake can contribute to obesity and diabetes.",
+    "Regular exercise can help prevent heart disease and other chronic illnesses.",
+    "Drinking enough water each day is crucial for maintaining good health."
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (!isHovered) {
+        setSuggestionIndex((prevIndex) => (prevIndex + 1) % suggestions.length);
+      }
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [isHovered, suggestions.length]);
+
   return (
     <div className="home_body">
+      
       {/* Sección Principal */}
       
       <section className="hero-section">
@@ -106,22 +127,23 @@ export const Home = () => {
 </section>
 
       {/* Sección "Find Your Doctor" */}
-      <section className="find-doctor">
+      <section className="find-doctor py-5">
         <h2>Find Your Doctor</h2>
         <div className="search-bar">
           <input type="text" placeholder="Orangel Hernandez" className="search-input" />
-          <button className="search-button"><i class="fa-solid fa-magnifying-glass custom-color"></i></button>
+          <button className="search-button"><i className="fa-solid fa-magnifying-glass custom-color"></i></button>
         </div>
       </section>
 
       {/* Sección "Medical Suggestions" */}
       <section className="medical-suggestions">
         <h2>Medical Suggestions</h2>
-        <blockquote className="suggestion">
-          <p>
-            "Excess sodium can increase blood pressure, and high sugar intake can
-            contribute to obesity and diabetes."
-          </p>
+        <blockquote 
+          className="suggestion"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          <p>{suggestions[suggestionIndex]}</p>
           <p>By Dr. Smith</p>
         </blockquote>
       </section>

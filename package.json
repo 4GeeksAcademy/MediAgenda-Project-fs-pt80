@@ -85,6 +85,6 @@
 		"react-calendar": "^5.1.0",
 		"react-dom": "^19.0.0",
 		"react-polyfills": "0.0.1",
-		"react-router-dom": "^6.3.0"
+		"react-router-dom": "^6.29.0"
 	}
 }

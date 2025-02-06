@@ -13,7 +13,10 @@ export const Navbar = () => {
     };
     const location = useLocation();
 
-
+    const handleNavigation = (path) => {
+        navigate(path);
+        setIsOpen(false); // Cierra el menú móvil después de navegar
+    };
 
     const isProfilePage = location.pathname === "/profile";
     const isLoginPage = location.pathname === "/login";
@@ -123,7 +126,7 @@ export const Navbar = () => {
                     </ul>
                 </div>
                 <li className="nav-btn-container">
-                    <Link to="/login" className="btn custom-btn special_margin" type="submit">
+                    <Link to="/login" className="btn custom-btn special_margin" onclick={()=> handleNavigation("/login")}>
                         <p>Login</p>
                     </Link>
                 </li>
@@ -175,7 +178,7 @@ export const Navbar = () => {
                 <div className={`align-items-center nav-container-items ${isOpen && "open"}`}>
                     <ul className="navbar-nav nav_links">
                         <li className="nav-item me-3 nav-text-content">
-                            <Link to="/" className="nav-link nav-text" aria-current="page">
+                            <Link to="/aboutus" className="nav-link nav-text" aria-current="page">
                                 About us
                             </Link>
                         </li>
@@ -195,10 +198,10 @@ export const Navbar = () => {
                     </ul>
                 </div>
                 <li className="nav-btn-container">
-                    <Link to="/" className="btn custom-btn special_margin" type="submit">
+                    <Link to="/login" className="btn custom-btn special_margin" type="submit">
                         <p>Login</p>
                     </Link>
-                    <Link to="/" className="btn custom-btn special_margin" type="submit">
+                    <Link to="/register" className="btn custom-btn special_margin" type="submit">
                         <p>Register</p>
                     </Link>
                 </li>
