@@ -24,7 +24,7 @@ app.url_map.strict_slashes = False
 
 app.config["JWT_SECRET_KEY"] = os.getenv('JWT_SECRET_KEY')
 jwt = JWTManager(app)
-#app.config("JWT_ACCESS_TOKEN_EXPIRES") = datetime(hours=1)
+app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=2)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecreto") 
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)

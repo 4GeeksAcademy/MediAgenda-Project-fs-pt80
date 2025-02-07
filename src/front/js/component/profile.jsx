@@ -24,7 +24,6 @@ export const PatientProfile = () => {
         // actions.fetchAppointments();
     }, []);
 
-    // ✅ Sincronizar datos del store con el estado local
     useEffect(() => {
         if (store.user) {
             setProfileData({
@@ -65,20 +64,21 @@ export const PatientProfile = () => {
                                 <p className="require-data-info">{profileData.apellido}</p>
                             </div>
                             <div>
-                                <p className="require-data-title">Phone Number:</p>
-                                <p className="require-data-info">{profileData.telefono}</p>
-                            </div>
-                            <div>
                                 <p className="require-data-title">Email:</p>
                                 <p className="require-data-info">{profileData.email}</p>
                             </div>
+                            {profileData.telefono && (
+                                <div>
+                                    <p className="require-data-title">Phone Number:</p>
+                                    <p className="require-data-info">{profileData.telefono}</p>
+                                </div>
+                            )}
                             {profileData.direccion && (
                                 <div>
                                     <p className="require-data-title">Address:</p>
                                     <p className="require-data-info">{profileData.direccion}</p>
                                 </div>
                             )}
-
                             
                         </div>
 

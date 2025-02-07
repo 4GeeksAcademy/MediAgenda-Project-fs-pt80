@@ -91,7 +91,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                   if (!response.ok) throw new Error("Error actualizando perfil");
                   const data = await response.json();
                   
-                  setStore({ user: data.user });
+                  setStore({ user: data.user,  });
                   return true;
                 } catch (error) {
                   console.error("Error en updateProfile:", error);
