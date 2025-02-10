@@ -63,115 +63,151 @@
 //   );
 // };
 
-import React, { useEffect, useState } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { gapi } from "gapi-script";
+import React, { useEffect, useState, useContext } from "react";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import moment from "moment";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import { Context } from "../store/appContext";
+import { signInWithGoogle } from "../component/gapi_auth.jsx";
 
-const CLIENT_ID = process.env.REACT_APP_CLIENT_ID;
-const API_KEY = process.env.REACT_APP_API_KEY;
-const SCOPES = "https://www.googleapis.com/auth/calendar";
+const localizer = momentLocalizer(moment);
 
-export const GoogleCalendar = ({ userType }) => {
-  const [date, setDate] = useState(new Date());
-  const [events, setEvents] = useState([]);
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState(null);
+export const PatientCalendar = () => {
+    const { store, actions } = useContext(Context);
+    const [events, setEvents] = useState([]);
+    const [selectedDate, setSelectedDate] = useState(null);
+    const [selectedTime, setSelectedTime] = useState("");
+    const [showForm, setShowForm] = useState(false);
 
-  useEffect(() => {
-    function start() {
-      gapi.client
-        .init({
-          apiKey: API_KEY,
-          clientId: CLIENT_ID,
-          discoveryDocs: ["https://www.googleapis.com/discovery/v1/apis/calendar/v3/rest"],
-          scope: SCOPES,
-        })
-        .then(() => {
-          const auth = gapi.auth2.getAuthInstance();
-          setIsSignedIn(auth.isSignedIn.get());
-          auth.isSignedIn.listen(setIsSignedIn);
-        });
-    }
-    gapi.load("client:auth2", start);
-  }, []);
+    useEffect(() => {
+        if (store.googleAccessToken && store.token && store.appointments.length === 0) {
+            actions.fetchAppointments();
+        }
+    }, [store.googleAccessToken, store.token]);
 
-  const handleAuthClick = () => {
-    gapi.auth2.getAuthInstance().signIn();
-  };
+    useEffect(() => {
+        if (store.appointments.length > 0) {
+            const formattedEvents = store.appointments.map((appt) => ({
+                id: appt.google_event_id,
+                title: appt.doctorName || "Cita Médica",
+                start: new Date(`${appt.appointment_date}T${appt.appointment_time}`),
+                end: new Date(`${appt.appointment_date}T${appt.appointment_time}`),
+            }));
+            
+            // Solo actualizar si los eventos han cambiado
+            if (JSON.stringify(formattedEvents) !== JSON.stringify(events)) {
+                setEvents(formattedEvents);
+            }
+        }
+    }, [store.appointments]);
 
-  const handleSignOutClick = () => {
-    gapi.auth2.getAuthInstance().signOut();
-    setEvents([]);
-  };
-
-  const fetchEvents = async () => {
-    if (!isSignedIn) return;
-    try {
-      const response = await gapi.client.calendar.events.list({
-        calendarId: "primary",
-        timeMin: new Date().toISOString(),
-        showDeleted: false,
-        singleEvents: true,
-        orderBy: "startTime",
-      });
-      setEvents(response.result.items || []);
-    } catch (error) {
-      console.error("Error fetching events: ", error);
-    }
-  };
-
-  const addEvent = async () => {
-    if (!isSignedIn) return;
-    const start = new Date(date);
-    start.setHours(10, 0, 0);
-    const end = new Date(start);
-    end.setHours(11, 0, 0);
-
-    const event = {
-      summary: userType === "doctor" ? "Disponibilidad del Doctor" : "Cita Médica",
-      start: { dateTime: start.toISOString(), timeZone: "America/New_York" },
-      end: { dateTime: end.toISOString(), timeZone: "America/New_York" },
+    // 🔹 Iniciar sesión con Google
+    const handleGoogleLogin = async () => {
+        const googleToken = await signInWithGoogle();
+        if (googleToken) {
+            actions.saveGoogleToken(googleToken);
+            actions.fetchAppointments();
+        }
     };
 
-    try {
-      await gapi.client.calendar.events.insert({
-        calendarId: "primary",
-        resource: event,
-      });
-      fetchEvents();
-    } catch (error) {
-      console.error("Error creating event: ", error);
-    }
-  };
+    // 🔹 Cerrar sesión solo en Google sin afectar la sesión de usuario
+    const handleGoogleLogout = () => {
+        actions.googleLogOut();
+        setEvents([]);
+    };
 
-  return (
-    <div>
-      <h2>{userType === "doctor" ? "Doctor Calendar" : "Patient Calendar"}</h2>
-      {!isSignedIn ? (
-        <button onClick={handleAuthClick}>Iniciar Sesión con Google</button>
-      ) : (
-        <button onClick={handleSignOutClick}>Cerrar Sesión</button>
-      )}
-      <Calendar onChange={setDate} value={date} />
-      <button onClick={fetchEvents}>Cargar Disponibilidad</button>
-      <button onClick={addEvent}>{userType === "doctor" ? "Agregar Disponibilidad" : "Reservar Cita"}</button>
-      <ul>
-        {events.map((event) => (
-          <li key={event.id} onClick={() => setSelectedEvent(event)}>
-            {event.summary} - {event.start.dateTime}
-          </li>
-        ))}
-      </ul>
-      {selectedEvent && (
-        <div>
-          <h3>Detalles del Evento</h3>
-          <p>{selectedEvent.summary}</p>
-          <p>Inicio: {selectedEvent.start.dateTime}</p>
-          <p>Fin: {selectedEvent.end.dateTime}</p>
-          <button onClick={() => setSelectedEvent(null)}>Cerrar</button>
+    // 🔹 Seleccionar una fecha en el calendario
+    const handleSelectSlot = ({ start }) => {
+        setSelectedDate(moment(start).format("YYYY-MM-DD"));
+        setShowForm(true);
+    };
+
+    // 🔹 Reservar una cita
+    const handleReserve = async (event) => {
+        event.preventDefault();
+        if (!selectedTime) {
+            alert("Por favor, selecciona una hora.");
+            return;
+        }
+
+        const appointmentData = {
+            appointment_date: selectedDate,
+            appointment_time: selectedTime,
+            medico_id: 1, // 🔹 Este ID debería ser dinámico según el médico seleccionado
+            access_token: store.googleAccessToken,
+            estado: "confirmada".toLowerCase()
+        };
+
+        await actions.createAppointment(appointmentData);
+        setShowForm(false);
+    };
+
+    const handleSelectEvent = async (event) => {
+        const isConfirmed = window.confirm("¿Quieres cancelar esta cita?");
+        if (!isConfirmed) return;
+
+        await actions.cancelAppointment(event.id);
+    };
+
+    return (
+        <div className="container mt-4">
+            <h2 className="text-center mb-4">Calendario de Citas</h2>
+
+            {!store.googleAccessToken ? (
+                <div className="alert alert-warning text-center">
+                    <p>Debes iniciar sesión con Google para ver tu calendario.</p>
+                    <button className="btn btn-primary" onClick={handleGoogleLogin}>
+                        Iniciar con Google
+                    </button>
+                </div>
+            ) : (
+                <>
+                    <div className="d-flex justify-content-between mb-3">
+                        <button className="btn btn-danger" onClick={handleGoogleLogout}>
+                            Cerrar Sesión en Google
+                        </button>
+                    </div>
+
+                    <Calendar
+                        localizer={localizer}
+                        events={events}
+                        startAccessor="start"
+                        endAccessor="end"
+                        style={{ height: 500 }}
+                        selectable
+                        onSelectSlot={handleSelectSlot}
+                        onSelectEvent={handleSelectEvent}
+                    />
+
+                    {showForm && (
+                        <div className="mt-4 p-4 border rounded">
+                            <h4>Reservar Cita para {selectedDate}</h4>
+                            <form onSubmit={handleReserve}>
+                                <div className="mb-3">
+                                    <label className="form-label">Selecciona la Hora:</label>
+                                    <input
+                                        type="time"
+                                        className="form-control"
+                                        value={selectedTime}
+                                        onChange={(e) => setSelectedTime(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="btn btn-success">
+                                    Reservar Cita
+                                </button>
+                                <button
+                                    type="button"
+                                    className="btn btn-secondary ms-2"
+                                    onClick={() => setShowForm(false)}
+                                >
+                                    Cancelar
+                                </button>
+                            </form>
+                        </div>
+                    )}
+                </>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };

@@ -1,7 +1,9 @@
 // editinformation.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
+import { Context } from "../store/appContext";
 
 export const Modals = ({ isOpen, onClose, profileData, updateProfileData }) => {
+  const {store, actions} = useContext(Context)
   const [formData, setFormData] = useState(profileData);
   const [errors, setErrors] = useState({});
 
@@ -24,9 +26,6 @@ export const Modals = ({ isOpen, onClose, profileData, updateProfileData }) => {
     let newErrors = {};
     if (!formData.telefono.trim()) {
       newErrors.telefono = "El teléfono es obligatorio";
-    }
-    if (!formData.securityNumber.trim()) {
-      newErrors.securityNumber = "El número de seguridad social es obligatorio";
     }
     return newErrors;
   };
@@ -124,22 +123,7 @@ export const Modals = ({ isOpen, onClose, profileData, updateProfileData }) => {
                   onChange={handleChange}
                 />
               </div>
-              <div className="mb-3">
-                <label htmlFor="securityNumber" className="form-label">
-                  Número de Seguridad Social <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.securityNumber ? "is-invalid" : ""}`}
-                  id="securityNumber"
-                  name="securityNumber"
-                  value={formData.securityNumber}
-                  onChange={handleChange}
-                />
-                {errors.securityNumber && (
-                  <div className="invalid-feedback">{errors.securityNumber}</div>
-                )}
-              </div>
+
             </div>
             <div className="modal-footer">
               <button type="button" className="btn btn-secondary" onClick={onClose}>

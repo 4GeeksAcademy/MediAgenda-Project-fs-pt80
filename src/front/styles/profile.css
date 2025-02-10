@@ -16,12 +16,9 @@ body {
     padding-bottom: 10px;
 }
 
-.profile-container{
-    padding: 30px 15px 40px 15px;
-    
-}
+
 .content-data-profile{
-    width: 80%;
+    width: 100%;
     background-color: rgba(111, 76, 176, 0.45);
     height: 100%;
     border-radius: 21px;
@@ -203,6 +200,10 @@ body {
 /* Responsive */ 
 
 @media (width <= 915px) {
+    .profile-container{
+        padding: 30px 15px 40px 15px  !important;
+        
+    }
     .content-data-profile{
         width: 100%;
     }

@@ -1,8 +1,11 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+# from sqlalchemy.dialects.postgresql import ENUM
+
 
 db = SQLAlchemy()
+# status_enum = ENUM('confirmada', 'cancelado', 'completado', name='status_enum', create_type=False)
 
 
 class Users(db.Model):
@@ -123,13 +126,15 @@ class Citas(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     paciente_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     medico_id = db.Column(db.Integer, db.ForeignKey('especialistas.id'), nullable=False)
-    estado = db.Column(db.Enum('pendiente', 'disponible', 'cancelado', 'completado', name='status_enum',), 
+    estado = db.Column(db.Enum('confirmada', 'cancelado', 'completado', name='status_enum',), 
         nullable=False)
     appointment_date = db.Column(db.Date, nullable=False)
     appointment_time = db.Column(db.Time, nullable=False)
     notes = db.Column(db.String(250))
     created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime)
+    google_event_id = db.Column(db.String(255), nullable=True)
+    
     
 
     def __repr__(self):
@@ -145,7 +150,8 @@ class Citas(db.Model):
             "appointment_time": self.appointment_time.strftime('%H:%M'),
             "notes": self.notes,
             "created_at": self.created_at, 
-            "updated_at": self.updated_at         
+            "updated_at": self.updated_at,
+            "google_event_id": self.google_event_id   
         }
 
 #necesita mejoras

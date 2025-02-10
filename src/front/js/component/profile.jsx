@@ -18,13 +18,12 @@ export const PatientProfile = () => {
         direccion: "",
     });
 
-   
+
     useEffect(() => {
         actions.getProfile();
         // actions.fetchAppointments();
     }, []);
 
-    // ✅ Sincronizar datos del store con el estado local
     useEffect(() => {
         if (store.user) {
             setProfileData({
@@ -33,7 +32,7 @@ export const PatientProfile = () => {
                 telefono: store.user.telefono || "",
                 email: store.user.email || "",
                 direccion: store.user.direccion || "",
-               
+
             });
         }
     }, [store.user]);
@@ -43,11 +42,11 @@ export const PatientProfile = () => {
         actions.updateProfile(updatedData);
     };
     useEffect(() => {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            tooltipTriggerList.forEach(tooltipTriggerEl => {
-                new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        }, []); 
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }, []);
 
     return (
         <>
@@ -65,13 +64,15 @@ export const PatientProfile = () => {
                                 <p className="require-data-info">{profileData.apellido}</p>
                             </div>
                             <div>
-                                <p className="require-data-title">Phone Number:</p>
-                                <p className="require-data-info">{profileData.telefono}</p>
-                            </div>
-                            <div>
                                 <p className="require-data-title">Email:</p>
                                 <p className="require-data-info">{profileData.email}</p>
                             </div>
+                            {profileData.telefono && (
+                                <div>
+                                    <p className="require-data-title">Phone Number:</p>
+                                    <p className="require-data-info">{profileData.telefono}</p>
+                                </div>
+                            )}
                             {profileData.direccion && (
                                 <div>
                                     <p className="require-data-title">Address:</p>
@@ -79,7 +80,6 @@ export const PatientProfile = () => {
                                 </div>
                             )}
 
-                            
                         </div>
 
                         <span className="fa-regular fa-pen-to-square prof-edit-icon"
