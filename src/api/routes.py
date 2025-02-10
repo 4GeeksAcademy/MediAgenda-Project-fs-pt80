@@ -10,6 +10,7 @@ from datetime import datetime, timedelta, timezone
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
+from google.oauth2 import service_account
 import os
 
 api = Blueprint('api', __name__)
@@ -124,18 +125,37 @@ def profile():
         if not user:
             return jsonify({"error": "Usuario no encontrado"}), 404
 
-   
+        # ✅ OBTENER PERFIL (GET)
         if request.method == 'GET':
             if user.paciente:
                 patient_profile = Pacientes.query.filter_by(user_id=user.id).first()
                 if not patient_profile:
                     return jsonify({"error": "Perfil de paciente no encontrado"}), 404
 
+                especialistas = db.session.query(Especialistas, Users).join(Users, Especialistas.user_id == Users.id).all()
+
+                doctors_list = [
+                    {
+                        "id": doctor.id,
+                        "nombre": user.nombre,
+                        "apellido": user.apellido,
+                        "especialidades": doctor.especialidades,
+                        "telefono_oficina": doctor.telefono_oficina or "",
+                        "clinica": doctor.clinica or "",
+                        "numero_colegiatura": doctor.numero_colegiatura or "",
+                        "direccion_centro_trabajo": doctor.direccion_centro_trabajo or "",
+                        "descripcion": doctor.descripcion or "",
+                    }
+                    for doctor, user in especialistas
+                ]
+
                 return jsonify({
                     "role": "paciente",
                     "user": user.serialize(),
-                    "profile": patient_profile.serialize()
+                    "profile": patient_profile.serialize(),
+                    "doctors": doctors_list
                 }), 200
+
             else:
                 specialist_profile = Especialistas.query.filter_by(user_id=user.id).first()
                 if not specialist_profile:
@@ -147,48 +167,54 @@ def profile():
                     "profile": specialist_profile.serialize()
                 }), 200
 
-        # Si es método PUT, se actualiza la información
+        # ✅ ACTUALIZAR PERFIL (PUT)
         elif request.method == 'PUT':
             data = request.get_json()
             if not data:
                 return jsonify({"error": "No se enviaron datos"}), 400
 
-            # Actualiza campos del usuario (por ejemplo, nombre, apellido y email)
-            user.nombre = data.get('nombre', user.nombre)
-            user.apellido = data.get('apellido', user.apellido)
-            user.email = data.get('email', user.email)
+            # 🔹 Actualizar datos generales del usuario
+            user.nombre = data.get("nombre", user.nombre)
+            user.apellido = data.get("apellido", user.apellido)
+            user.email = data.get("email", user.email)
 
-            # Dependiendo del rol, actualizamos la tabla correspondiente
             if user.paciente:
-                profile_record = Pacientes.query.filter_by(user_id=user.id).first()
-                if not profile_record:
+                patient_profile = Pacientes.query.filter_by(user_id=user.id).first()
+                if not patient_profile:
                     return jsonify({"error": "Perfil de paciente no encontrado"}), 404
+
+                patient_profile.telefono = data.get("telefono") or patient_profile.telefono
+                patient_profile.direccion = data.get("direccion") or patient_profile.direccion
+                patient_profile.genero = data.get("genero") or patient_profile.genero
+                patient_profile.fecha_nacimiento = data.get("fecha_nacimiento") or patient_profile.fecha_nacimiento
+
             else:
-                profile_record = Especialistas.query.filter_by(user_id=user.id).first()
-                if not profile_record:
+                specialist_profile = Especialistas.query.filter_by(user_id=user.id).first()
+                if not specialist_profile:
                     return jsonify({"error": "Perfil de especialista no encontrado"}), 404
 
-            # Actualizamos los campos del perfil
-            profile_record.telefono = data.get('telefono', profile_record.telefono)
-            profile_record.direccion = data.get('direccion', profile_record.direccion)
-            profile_record.securityNumber = data.get('securityNumber', profile_record.securityNumber)
+                specialist_profile.telefono_oficina = data.get("telefono_oficina") or specialist_profile.telefono_oficina
+                specialist_profile.clinica = data.get("clinica") or specialist_profile.clinica
+                specialist_profile.numero_colegiatura = data.get("numero_colegiatura") or specialist_profile.numero_colegiatura
+                specialist_profile.direccion_centro_trabajo = data.get("direccion_centro_trabajo") or specialist_profile.direccion_centro_trabajo
+                specialist_profile.descripcion = data.get("descripcion") or specialist_profile.descripcion
+                specialist_profile.especialidades = data.get("especialidades") or specialist_profile.especialidades
 
-            try:
-                db.session.commit()
-            except Exception as e:
-                db.session.rollback()
-                return jsonify({"error": f"Error actualizando el perfil: {str(e)}"}), 500
+            db.session.commit()  # ✅ Solo un commit al final
 
-            # Retorna los datos actualizados
             return jsonify({
-                "role": "paciente" if user.paciente else "especialista",
+                "msg": "Perfil actualizado correctamente",
                 "user": user.serialize(),
-                "profile": profile_record.serialize()
+                "profile": specialist_profile.serialize() if not user.paciente else patient_profile.serialize()
             }), 200
 
     except Exception as e:
+        db.session.rollback()
+        print("❌ Error en profile:", str(e))
         return jsonify({"error": str(e)}), 500
 
+
+    
 @api.route('/auth/google', methods=['GET'])
 def google_auth():
     auth_url, state = flow.authorization_url(prompt="consent")
@@ -361,46 +387,88 @@ def eliminar_disponibilidad(id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+def get_calendar_service_from_token(google_token):
+    credentials = Credentials(google_token)
+    service = build('calendar', 'v3', credentials=credentials)
+    return service
+
+def create_google_event(appointment_data, google_token):
+    credentials = Credentials(google_token)
+    service = build("calendar", "v3", credentials=credentials)
+    
+    date_str = appointment_data["appointment_date"]
+    time_str = appointment_data["appointment_time"]
+    start_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+    end_datetime = start_datetime + timedelta(hours=1) 
+    start_t = start_datetime.isoformat()
+    end_t = end_datetime.isoformat()
+    
+    event = {
+        'summary': appointment_data.get("doctorName", "Cita Médica"),
+        'description': appointment_data.get("description", "Cita agendada desde la aplicación"),
+        'start': {
+            'dateTime': start_t,
+            'timeZone': 'UTC'
+        },
+        'end': {
+            'dateTime': end_t,
+            'timeZone': 'UTC'
+        },
+    }
+    
+    created_event = service.events().insert(calendarId='primary', body=event).execute()
+    return created_event['id']
+
+def cancel_google_event(google_event_id, google_token):
+    credentials = Credentials(google_token)
+    service = build("calendar", "v3", credentials=credentials)
+    try:
+        service.events().delete(calendarId='primary', eventId=google_event_id).execute()
+        return True
+    except Exception as e:
+        print("Error al cancelar el evento en Google Calendar:", e)
+        return False
+
 @api.route('/citas', methods=['POST'])
 @jwt_required()
 def agendar_cita():
     try:
         current_user = get_jwt_identity()
-        data = request.json
-        medico = Especialistas.query.get(data['medico_id'])
-        fecha = data['appointment_date']
-        hora = data['appointment_time']
-        credentials = Credentials(data.get("access_token"))
-        service = build("calendar", "v3", credentials=credentials)
+        data = request.get_json()
 
-        start_time = f"{fecha}T{hora}:00"
-        end_time = f"{fecha}T{int(hora.split(':')[0]) + 1}:00"
+        # Validar que se reciba el token de Google
+        google_token = request.headers.get("X-Google-Access-Token")
+        if not google_token:
+            return jsonify({"error": "Token de Google (access_token) no enviado"}), 400
 
-        event_body = {
-            "summary": f"Cita con Dr. {medico.user.nombre} {medico.user.apellido}",
-            "start": {"dateTime": start_time, "timeZone": "Europe/Madrid"},
-            "end": {"dateTime": end_time, "timeZone": "Europe/Madrid"},
-            "attendees": [{"email": medico.user.email}]
-        }
+        # Crear evento en Google Calendar
+        google_event_id = create_google_event(data, google_token)
 
-        event = service.events().insert(calendarId="primary", body=event_body).execute()
         
+        estado = data.get("estado", "confirmada").strip().lower()
+
+       
+
+        # Guardar cita en la base de datos
         nueva_cita = Citas(
-            paciente_id=current_user,
-            medico_id=medico.id,
-            estado='pendiente',
-            appointment_date=fecha,
-            appointment_time=hora,
-            google_event_id=event["id"]
+            paciente_id=current_user,                   
+            medico_id=data.get("medico_id"),            
+            appointment_date=data.get("appointment_date"),  
+            appointment_time=data.get("appointment_time"),
+            estado=estado,  
+            google_event_id=google_event_id
         )
         db.session.add(nueva_cita)
         db.session.commit()
 
-        return jsonify({"msg": "Cita agendada con éxito", "event_id": event["id"]}), 201
+        return jsonify({"msg": "Cita agendada con éxito", "google_event_id": google_event_id}), 201
+
     except Exception as e:
         db.session.rollback()
+        print("❌ Error agendando cita:", str(e))
         return jsonify({"error": str(e)}), 500
-    
+
+
 @api.route('/citas', methods=['GET'])
 @jwt_required()
 def list_citas():
@@ -409,44 +477,69 @@ def list_citas():
         user = Users.query.get(current_user)
 
        
-        if user.paciente:
-            citas_db = Citas.query.filter_by(paciente_id=current_user).all()
-        else:
-            citas_db = Citas.query.filter_by(medico_id=current_user).all()
-        
+        citas_db = Citas.query.filter_by(paciente_id=current_user).all() if user.paciente else Citas.query.filter_by(medico_id=current_user).all()
         citas_serializadas = [cita.serialize() for cita in citas_db]
 
-      
-        access_token = request.headers.get("Authorization").split("Bearer ")[-1]
-        credentials = Credentials(access_token)
-        service = build("calendar", "v3", credentials=credentials)
+        google_token = request.headers.get("X-Google-Access-Token")
+        google_events = []
 
-    
-        now = datetime.now().isoformat() + "Z" 
-        events_result = service.events().list(
-            calendarId="primary",
-            timeMin=now,
-            singleEvents=True,
-            orderBy="startTime"
-        ).execute()
+        if google_token:
+            try:
+                service = get_calendar_service_from_token(google_token)
+                now = datetime.now().isoformat() + "Z"
+                events_result = service.events().list(
+                    calendarId="primary",
+                    timeMin=now,
+                    singleEvents=True,
+                    orderBy="startTime"
+                ).execute()
 
-        events = events_result.get("items", [])
+                for event in events_result.get("items", []):
+                    google_events.append({
+                        "google_event_id": event.get("id"),
+                        "summary": event.get("summary"),
+                        "start": event["start"].get("dateTime"),
+                        "end": event["end"].get("dateTime"),
+                        "attendees": event.get("attendees", [])
+                    })
 
+            except Exception as e:
+                print("❌ Error obteniendo eventos de Google Calendar:", str(e))
 
-        citas_google = []
-        for event in events:
-            citas_google.append({
-                "google_event_id": event.get("id"),
-                "summary": event.get("summary"),
-                "start": event.get("start").get("dateTime"),
-                "end": event.get("end").get("dateTime"),
-                "attendees": event.get("attendees", [])
-            })
-
-        
-        todas_las_citas = citas_serializadas + citas_google
-
-        return jsonify({"msg": "Citas obtenidas exitosamente", "citas": todas_las_citas}), 200
+        # Retornar citas de la BD + eventos de Google Calendar
+        return jsonify({"msg": "Citas obtenidas exitosamente", "citas": citas_serializadas + google_events}), 200
 
     except Exception as e:
+        print("❌ Error general en list_citas:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+@api.route('/citas/<string:google_event_id>', methods=['DELETE'])
+@jwt_required()
+def cancel_cita(google_event_id):
+    try:
+        current_user = get_jwt_identity()
+        user = Users.query.get(current_user)
+        
+        if user.paciente:
+            appointment = Citas.query.filter_by(google_event_id=google_event_id, paciente_id=current_user).first()
+        else:
+            appointment = Citas.query.filter_by(google_event_id=google_event_id, medico_id=current_user).first()
+        if not appointment:
+            return jsonify({"error": "Cita no encontrada"}), 404
+
+        google_token = request.headers.get("X-Google-Access-Token")
+        if not google_token:
+            return jsonify({"error": "Token de Google no enviado"}), 400
+
+      
+        if not cancel_google_event(google_event_id, google_token):
+            return jsonify({"error": "Error al cancelar la cita en Google Calendar"}), 500
+
+        db.session.delete(appointment)
+        db.session.commit()
+
+        return jsonify({"message": "Cita cancelada correctamente"}), 200
+
+    except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500

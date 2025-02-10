@@ -18,7 +18,7 @@ export const PatientProfile = () => {
         direccion: "",
     });
 
-   
+
     useEffect(() => {
         actions.getProfile();
         // actions.fetchAppointments();
@@ -32,7 +32,7 @@ export const PatientProfile = () => {
                 telefono: store.user.telefono || "",
                 email: store.user.email || "",
                 direccion: store.user.direccion || "",
-               
+
             });
         }
     }, [store.user]);
@@ -42,11 +42,11 @@ export const PatientProfile = () => {
         actions.updateProfile(updatedData);
     };
     useEffect(() => {
-            const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-            tooltipTriggerList.forEach(tooltipTriggerEl => {
-                new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-        }, []); 
+        const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+        tooltipTriggerList.forEach(tooltipTriggerEl => {
+            new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    }, []);
 
     return (
         <>
@@ -79,7 +79,7 @@ export const PatientProfile = () => {
                                     <p className="require-data-info">{profileData.direccion}</p>
                                 </div>
                             )}
-                            
+
                         </div>
 
                         <span className="fa-regular fa-pen-to-square prof-edit-icon"

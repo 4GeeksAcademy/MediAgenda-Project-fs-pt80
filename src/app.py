@@ -29,6 +29,7 @@ app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersecreto")
 app.config["SESSION_TYPE"] = "filesystem"
 Session(app)
 
+
 # database condiguration
 db_url = os.getenv("DATABASE_URL")
 if db_url is not None:
@@ -77,6 +78,13 @@ def sitemap():
     return send_from_directory(static_file_dir, 'index.html')
 
 # any other endpoint will try to serve it like a static file
+@app.after_request
+def add_security_headers(response):
+    response.headers["Content-Security-Policy"] = "script-src 'self' https://accounts.google.com https://www.gstatic.com;"
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS, PUT, DELETE"
+    response.headers["Access-Control-Allow-Headers"] = "Authorization, Content-Type, X-Google-Access-Token"
+    return response
 @app.route('/<path:path>', methods=['GET'])
 def serve_any_other_file(path):
     if not os.path.isfile(os.path.join(static_file_dir, path)):
