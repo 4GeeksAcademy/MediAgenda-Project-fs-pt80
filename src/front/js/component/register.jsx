@@ -43,9 +43,9 @@ export const Register = () => {
     };
 
     return (
-        <>
-            <h3 className="doctor-register-title">Register</h3>
-            <div className="doctor-register-container">
+        <div className=" justify-content-center align-items-center vh-100">
+            <h3 className="doctor-register-title m-5 p-5 mb-0 pb-0">Register</h3>
+            <div className="doctor-register-container mt-0 pt-3">
                 <div className="doctor-register-card">
                     <form onSubmit={handleSubmit}>
                         <div className="row">
@@ -148,6 +148,6 @@ export const Register = () => {
                     </form>
                 </div>
             </div>
-        </>
+        </div>
     );
 };
