@@ -5,6 +5,7 @@ import logo_footer from "../../img/logo_footer.png";
 
 export const Footer = () => {
 const navigate = useNavigate();
+return(
   <footer className="footer">
     <div className="footer-body">
       <div className="container"> 
@@ -29,4 +30,5 @@ const navigate = useNavigate();
       </div>
     </div>
   </footer>
+)
 };
