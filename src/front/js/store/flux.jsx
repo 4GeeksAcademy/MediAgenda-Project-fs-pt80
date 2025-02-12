@@ -11,7 +11,16 @@ const getState = ({ getStore, getActions, setStore }) => {
             googleAuthUrl: "",
             loading: false,
             error: null,
-            doctors: []
+            doctors: [],
+            selectedDate: null,
+            selectedTime: "",
+            selectedSpeciality: null,
+            selectedDoctor: null,
+            showForm: false,
+            availabilityDate: null,
+            availabilityStartTime: "",
+            availabilityEndTime: "",
+            availabilityShowForm: false,
         },
 
         actions: {
@@ -78,12 +87,40 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const googleToken = await signInWithGoogle();
                     if (googleToken) {
                         getActions().saveGoogleToken(googleToken);
-                        await getActions().fetchAppointments();
+                        await getActions().getProfile(); // 🔹 Esperamos que se cargue el usuario
+            
+                        const store = getStore();
+                        console.log("🟢 Usuario después de getProfile():", store.user); // Debugging
+            
+                        if (store.user && store.user.id) {
+                            if (store.user.paciente) {
+                                await getActions().fetchAppointments();
+                            } else {
+                                await getActions().fetchAvailability(store.user.id);
+                            }
+                        } else {
+                            console.error("⚠️ Usuario no cargado correctamente en store.user");
+                        }
                     }
                 } catch (error) {
                     console.error("❌ Error en handleGoogleLogin:", error);
                 }
+            },            
+
+            fetchDoctors: async () => {
+                try {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/doctores`, {
+                        method: "GET",
+                        headers: { Authorization: `Bearer ${getStore().token}` },
+                    });
+                    if (!resp.ok) throw new Error("Error obteniendo lista de médicos");
+                    const data = await resp.json();
+                    setStore({ doctors: data.doctors });
+                } catch (error) {
+                    console.error("❌ Error al cargar médicos:", error);
+                }
             },
+
 
             getProfile: async () => {
                 try {
@@ -105,36 +142,51 @@ const getState = ({ getStore, getActions, setStore }) => {
                         return;
                     }
             
-                    // ✅ Asegurar que el perfil tiene los valores correctos
-                    setStore({ 
-                        user: data.user,  
-                        role: data.role,
-                        profile: {
-                            nombre: data.user?.nombre || "No especificado",
-                            apellido: data.user?.apellido || "No especificado",
-                            email: data.user?.email || "No especificado",
-                            especialidades: data.profile?.especialidades || "No especificado",
-                            telefono_oficina: data.profile?.telefono_oficina || "",
-                            clinica: data.profile?.clinica || "",
-                            numero_colegiatura: data.profile?.numero_colegiatura || "",
-                            direccion_centro_trabajo: data.profile?.direccion_centro_trabajo || "",
-                            descripcion: data.profile?.descripcion || "",
-                        },
-                        doctors: Array.isArray(data.doctors) ? data.doctors : [] 
-                    });
+                    
+                    if (data.role === "paciente") {
+                        setStore({
+                            user: data.user,
+                            role: "paciente",
+                            profile: {
+                                nombre: data.user?.nombre || "",
+                                apellido: data.user?.apellido || "",
+                                email: data.user?.email || "",
+                                telefono: data.profile?.telefono || "",  
+                                direccion: data.profile?.direccion || "",
+                            }
+                        });
+                    } else if (data.role === "especialista") {
+                        setStore({
+                            user: data.user,
+                            role: "especialista",
+                            profile: {
+                                nombre: data.user?.nombre || "",
+                                apellido: data.user?.apellido || "",
+                                email: data.user?.email || "",
+                                especialidades: data.profile?.especialidades || "No especificado",
+                                telefono_oficina: data.profile?.telefono_oficina || "",
+                                clinica: data.profile?.clinica || "",
+                                numero_colegiatura: data.profile?.numero_colegiatura || "",
+                                direccion_centro_trabajo: data.profile?.direccion_centro_trabajo || "",
+                                descripcion: data.profile?.descripcion || "",
+                            }
+                        });
+                    } else {
+                        console.error("Rol desconocido:", data.role);
+                    }
             
                     console.log("✅ Perfil guardado en store:", getStore().profile);
                 } catch (error) {
-                    console.error("❌ Error cargando perfil:", error);
+                    console.error("Error cargando perfil:", error);
                 }
             },
-            
-            
             
             updateProfile: async (profileData) => {
                 try {
                     const token = localStorage.getItem("token");
                     if (!token) return false;
+            
+                    console.log("📤 Enviando datos al backend:", profileData); 
             
                     const response = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
                         method: "PUT",
@@ -145,17 +197,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                         body: JSON.stringify(profileData),
                     });
             
-                    if (!response.ok) throw new Error("Error al actualizar el perfil");
+                    if (!response.ok) {
+                        const errorResponse = await response.json();
+                        console.error("❌ Respuesta del backend con error:", errorResponse);
+                        throw new Error("Error al actualizar el perfil");
+                    }
             
                     console.log("✅ Perfil actualizado correctamente.");
-                    await getActions().getProfile(); // 🔹 Se vuelve a cargar el perfil actualizado
+                    await getActions().getProfile();
                     return true;
                 } catch (error) {
                     console.error("❌ Error en updateProfile:", error);
                     return false;
                 }
             },
-            
             
             
 
@@ -197,126 +252,257 @@ const getState = ({ getStore, getActions, setStore }) => {
             
                 alert("Sesión cerrada correctamente.");
             },
+            fetchDoctors: async () => {
+                try {
+                    console.log("🔄 Cargando lista de médicos...");
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
+                        method: "GET",
+                        headers: { Authorization: `Bearer ${getStore().token}` },
+                    });
+                    
+                    if (!resp.ok) throw new Error(`Error obteniendo médicos: ${resp.statusText}`);
+                    
+                    const data = await resp.json();
+                    console.log("✅ Médicos cargados:", data.doctors);
+                    setStore({ doctors: data.doctors });
+                } catch (error) {
+                    console.error("❌ Error al cargar médicos:", error);
+                }
+            },
+
+            //Citas 
+            setSelectedSpeciality: (increment) => {
+                const store = getStore();
+                
+                if (!store.doctors.length) {
+                    console.error("⚠️ No hay doctores cargados aún.");
+                    return;
+                }
+            
+                const especialidades = [...new Set(store.doctors.map(doc => doc.especialidades).filter(Boolean))]; // Eliminar duplicados y nulos
+            
+                if (!especialidades.length) {
+                    console.error("⚠️ No hay especialidades disponibles.");
+                    return;
+                }
+            
+                let currentIndex = especialidades.indexOf(store.selectedSpeciality);
+                let nextIndex = (currentIndex + increment + especialidades.length) % especialidades.length;
+            
+                setStore({ selectedSpeciality: especialidades[nextIndex] });
+            
+                // 🔹 Filtrar doctores por la nueva especialidad seleccionada
+                const doctoresFiltrados = store.doctors.filter(doc => doc.especialidades === especialidades[nextIndex]);
+                if (doctoresFiltrados.length) {
+                    setStore({ selectedDoctor: doctoresFiltrados[0].id }); // 🔹 Selecciona el primer doctor por defecto
+                    getActions().fetchAvailability(doctoresFiltrados[0].id); // 🔹 Cargar su disponibilidad
+                }
+            },
+            
+            setSelectedDoctor: (doctorId) => {
+                setStore({ selectedDoctor: doctorId });
+                getActions().fetchAvailability(doctorId); // 🔹 Cargar disponibilidad al seleccionar un doctor
+            },
+        
+            setShowForm: (value) => {
+                setStore({ showForm: value });
+            },
+        
+            setSelectedTime: (time) => {
+                setStore({ selectedTime: time });
+            },
+            setSelectedDate: (date) => setStore({ selectedDate: date }),
             
             fetchAppointments: async () => {
                 try {
                     const store = getStore();
                     const googleToken = store.googleAccessToken;
-            
-                    if (!googleToken) {
-                        console.warn("⚠️ No hay token de Google disponible.");
-                        return;
-                    }
-            
-                    // Evitar llamadas repetitivas si las citas ya han sido obtenidas recientemente
-                    if (store.appointments.length > 0 && store.lastFetched) {
-                        const now = new Date().getTime();
-                        const lastFetchedTime = store.lastFetched;
-                        if (now - lastFetchedTime < 10000) { // 10 segundos
-                            console.log("⚠️ Evitando llamada repetida a fetchAppointments.");
-                            return;
-                        }
-                    }
-            
+                    if (!googleToken) return;
+
                     console.log("🔄 Obteniendo citas...");
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
                         method: "GET",
                         headers: {
                             Authorization: `Bearer ${store.token}`,
-                            "X-Google-Access-Token": googleToken, 
+                            "X-Google-Access-Token": googleToken,
                         },
                     });
-            
+
                     if (!resp.ok) throw new Error("Error obteniendo citas");
                     const data = await resp.json();
-            
-                    setStore({ 
-                        appointments: data.citas, 
-                        lastFetched: new Date().getTime() // Guardar tiempo de última actualización
-                    });
-                    console.log("✅ Citas obtenidas correctamente:", data.citas);
+                    setStore({ appointments: data.citas });
                 } catch (error) {
                     console.error("❌ Error en fetchAppointments:", error);
                 }
             },
+
             createAppointment: async (appointmentData) => {
                 try {
                     const store = getStore();
-                    const googleToken = store.googleAccessToken;
+                    let googleToken = store.googleAccessToken;
             
+                    // 🔄 Intentar refrescar el token si no está disponible
                     if (!googleToken) {
-                        console.warn("⚠️ No hay token de Google disponible.");
-                        return;
+                        console.log("🔄 Intentando refrescar el token de Google...");
+                        const tokenResp = await fetch(`${process.env.BACKEND_URL}/api/refresh_token`, {
+                            method: "GET",
+                            headers: { Authorization: `Bearer ${store.token}` },
+                        });
+            
+                        if (!tokenResp.ok) throw new Error("Error refrescando el token de Google");
+            
+                        const tokenData = await tokenResp.json();
+                        googleToken = tokenData.access_token;
+                        setStore({ googleAccessToken: googleToken });
                     }
             
-                    console.log("📅 Enviando datos de cita:", appointmentData); // Agregar depuración
+                    console.log("📅 Enviando datos de cita:", appointmentData);
             
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
                         method: "POST",
                         headers: {
                             Authorization: `Bearer ${store.token}`,
-                            "X-Google-Access-Token": googleToken, 
+                            "X-Google-Access-Token": googleToken,
                             "Content-Type": "application/json",
                         },
                         body: JSON.stringify(appointmentData),
                     });
             
                     if (!resp.ok) {
-                        const errorText = await resp.text(); // Obtiene el error exacto del backend
+                        const errorText = await resp.text();
                         throw new Error(`Error creando cita: ${errorText}`);
                     }
             
-                    const data = await resp.json();
-                    console.log("✅ Cita creada en Google Calendar:", data);
-                    getActions().fetchAppointments(); // Recargar citas
+                    console.log("✅ Cita creada con éxito");
+                    await getActions().fetchAppointments();
                 } catch (error) {
                     console.error("❌ Error en createAppointment:", error);
                 }
-            },            
+            },
+            
             cancelAppointment: async (google_event_id) => {
                 try {
-                    const token = getStore().token || localStorage.getItem("token");
-                    const googleToken = getStore().googleAccessToken || localStorage.getItem("X-Google-Access-Token");
-            
-                    if (!token || !googleToken) {
-                        alert("Debes iniciar sesión antes de cancelar una cita.");
-                        return;
-                    }
-            
-                    console.log("🗑️ Cancelando cita con ID:", google_event_id); // Debug
-            
+                    const store = getStore();
+                    const googleToken = store.googleAccessToken;
+                    if (!googleToken) return;
+
+                    console.log("🗑️ Cancelando cita con ID:", google_event_id);
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/citas/${google_event_id}`, {
                         method: "DELETE",
                         headers: {
-                            Authorization: `Bearer ${token}`,
+                            Authorization: `Bearer ${store.token}`,
                             "X-Google-Access-Token": googleToken,
+                        },
+                    });
+
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error cancelando cita: ${errorText}`);
+                    }
+                    await getActions().fetchAppointments();
+                } catch (error) {
+                    console.error("❌ Error en cancelAppointment:", error);
+                }
+            },
+   
+            //Manejo disponibilidad
+            setAvailabilityDate: (date) => setStore({ availabilityDate: date }),
+            setAvailabilityStartTime: (time) => setStore({ availabilityStartTime: time }),
+            setAvailabilityEndTime: (time) => setStore({ availabilityEndTime: time }),
+            setAvailabilityShowForm: (value) => setStore({ availabilityShowForm: value }),
+            
+            fetchAvailability: async (medico_id) => {
+                if (!medico_id) {
+                    console.error("❌ Error: medico_id es indefinido.");
+                    return;
+                }
+            
+                try {
+                    console.log(`🔄 Cargando disponibilidad del médico ID: ${medico_id}...`);
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad?medico_id=${medico_id}`, {
+                        method: "GET",
+                        headers: { 
+                            Authorization: `Bearer ${getStore().token}`,
+                            "X-Google-Access-Token": getStore().googleAccessToken
                         },
                     });
             
                     if (!resp.ok) {
                         const errorText = await resp.text();
-                        throw new Error(`Error cancelando cita: ${errorText}`);
+                        throw new Error(`Error obteniendo disponibilidad: ${errorText}`);
                     }
             
-                    await getActions().fetchAppointments(); // Recargar citas
-                    alert("Cita cancelada correctamente.");
-                } catch (error) {
-                    console.error("❌ Error en cancelAppointment:", error);
-                }
-            },
-            fetchAvailability: async () => {
-                try {
-                    const token = getStore().token;
-                    const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (!resp.ok) throw new Error("Error obteniendo disponibilidad");
                     const data = await resp.json();
-                    setStore({ availability: data });
+                    console.log("✅ Disponibilidad obtenida:", data.disponibilidad);
+                    setStore({ availability: data.disponibilidad || [] });
                 } catch (error) {
                     console.error("Error en fetchAvailability:", error);
+                    alert("Error cargando la disponibilidad.");
                 }
             },
+            
+            createAvailability: async (availabilityData) => {
+                try {
+                    console.log("📅 Enviando datos de disponibilidad:", availabilityData);
+                    const store = getStore();
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
+                        method: "POST",
+                        headers: {
+                            Authorization: `Bearer ${store.token}`,
+                            "X-Google-Access-Token": store.googleAccessToken, 
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(availabilityData),
+                    });
+            
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error creando disponibilidad: ${errorText}`);
+                    }
+            
+                    console.log("✅ Disponibilidad creada en Google Calendar");
+                    getActions().fetchAvailability(availabilityData.medico_id);
+                } catch (error) {
+                    console.error("❌ Error en createAvailability:", error);
+                }
+            },
+
+            deleteAvailability: async (id) => {
+                try {
+                    const store = getStore();
+                    const token = store.token;
+                    const googleToken = store.googleAccessToken;
+            
+                    if (!token || !googleToken) {
+                        alert("⚠️ Debes iniciar sesión antes de eliminar una disponibilidad.");
+                        return;
+                    }
+            
+                    console.log(`🗑️ Eliminando disponibilidad con ID: ${id}...`);
+            
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad/${id}`, {
+                        method: "DELETE",
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "X-Google-Access-Token": googleToken,
+                            "Content-Type": "application/json"
+                        },
+                    });
+            
+                    if (!resp.ok) {
+                        const errorText = await resp.text();
+                        throw new Error(`Error al eliminar: ${errorText}`);
+                    }
+            
+                    console.log("✅ Disponibilidad eliminada correctamente en Google Calendar y base de datos.");
+                    alert("✅ Disponibilidad eliminada correctamente.");
+            
+                    await getActions().fetchAvailability(store.user.id);
+                } catch (error) {
+                    console.error("❌ Error en deleteAvailability:", error);
+                    alert("❌ Error al eliminar la disponibilidad. Intenta nuevamente.");
+                }
+            },            
         },
     };
 };

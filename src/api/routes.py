@@ -167,7 +167,7 @@ def profile():
                     "profile": specialist_profile.serialize()
                 }), 200
 
-        # ✅ ACTUALIZAR PERFIL (PUT)
+       
         elif request.method == 'PUT':
             data = request.get_json()
             if not data:
@@ -213,11 +213,31 @@ def profile():
         print("❌ Error en profile:", str(e))
         return jsonify({"error": str(e)}), 500
 
+def refresh_google_token(user):
+    try:
+        if not user.google_refresh_token:
+            return None, "No refresh token available"
+        
+        credentials = Credentials(
+            None,
+            refresh_token=user.google_refresh_token,
+            token_uri="https://oauth2.googleapis.com/token",
+            client_id=os.getenv("REACT_APP_CLIENT_ID"),
+            client_secret=os.getenv("BACKEND_CLIENT_SECRET"),
+        )
+        
+        credentials.refresh(request())
+        user.google_access_token = credentials.token 
+        db.session.commit()
+        
+        return credentials.token, None
+    except Exception as e:
+        return None, str(e)
 
     
 @api.route('/auth/google', methods=['GET'])
 def google_auth():
-    auth_url, state = flow.authorization_url(prompt="consent")
+    auth_url, state = flow.authorization_url(access_type="offline", prompt="consent")
     session["oauth_state"] = state
     return jsonify({"auth_url": auth_url})
 
@@ -226,6 +246,19 @@ def google_callback():
     try:
         flow.fetch_token(authorization_response=request.url)
         credentials = flow.credentials
+
+        
+        user_email = credentials.id_token.get("email")
+        user = Users.query.filter_by(email=user_email).first()
+
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+
+        
+        user.google_access_token = credentials.token
+        user.google_refresh_token = credentials.refresh_token if credentials.refresh_token else user.google_refresh_token
+        db.session.commit()
+
         return jsonify({
             "access_token": credentials.token,
             "refresh_token": credentials.refresh_token,
@@ -235,57 +268,64 @@ def google_callback():
         }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    
+@api.route('/refresh_token', methods=['GET'])
+@jwt_required()
+def refresh_token():
+    try:
+        current_user = get_jwt_identity()
+        user = Users.query.get(current_user)
+
+        if not user:
+            return jsonify({"error": "Usuario no encontrado"}), 404
+        
+        new_token, error = refresh_google_token(user)
+
+        if error:
+            return jsonify({"error": error}), 400
+
+        return jsonify({"access_token": new_token}), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @api.route('/disponibilidad', methods=['GET'])
 @jwt_required()
 def obtener_disponibilidad():
     try:
         medico_id = request.args.get("medico_id")
-        medico = Especialistas.query.get(medico_id)
 
-        if not medico:
+        if not medico_id:
+            return jsonify({"error": "Se requiere un ID de médico"}), 400
+
+        # 🔹 Buscar por el ID correcto en la tabla Especialistas
+        especialista = Especialistas.query.get(medico_id)  
+
+        if not especialista:
             return jsonify({"error": "Médico no encontrado"}), 404
 
-        credentials = Credentials(request.headers.get("Authorization").split(" ")[1])
-        service = build("calendar", "v3", credentials=credentials)
+        disponibilidad = DisponibilidadMedico.query.filter_by(medico_id=especialista.id).all()
 
-        now = datetime.now().isoformat() + "Z"
-        events_result = service.events().list(
-            calendarId="primary",
-            timeMin=now,
-            maxResults=20,
-            singleEvents=True,
-            orderBy="startTime"
-        ).execute()
-
-        eventos = events_result.get("items", [])
-
-        disponibilidad = [
-            {
-                "id": e["id"],
-                "start": e["start"]["dateTime"],
-                "end": e["end"]["dateTime"]
-            }
-            for e in eventos
-        ]
-
-        return jsonify({"disponibilidad": disponibilidad}), 200
+        return jsonify({"disponibilidad": [dispo.serialize() for dispo in disponibilidad]}), 200
     except Exception as e:
+        print("❌ Error en obtener_disponibilidad:", str(e))
         return jsonify({"error": str(e)}), 500
-    
+
 @api.route('/disponibilidad', methods=['POST'])
 @jwt_required()
 def crear_disponibilidad():
     try:
         current_user = get_jwt_identity()
-        especialista = Especialistas.query.filter_by(user_id=current_user).first()
-        # if not especialista:
-        #     return jsonify({'error': 'No autorizado'}), 403
-        
+        especialista = db.session.query(Especialistas).filter_by(user_id=current_user).first()
+
+        if not especialista:
+            return jsonify({'error': 'No autorizado o especialista no encontrado'}), 403
+
         data = request.json
         fecha = data['fecha']
         hora_inicio = data['hora_inicio']
         hora_final = data['hora_final']
+
         credentials = Credentials(data.get("access_token"))
         service = build("calendar", "v3", credentials=credentials)
 
@@ -294,20 +334,19 @@ def crear_disponibilidad():
 
         event_body = {
             "summary": "Disponibilidad del Médico",
-            "description": f"El Dr. {especialista.user.nombre} {especialista.user.apellido} está disponible en este horario.",
+            "description": f"El Dr. {especialista.users.nombre} {especialista.users.apellido} está disponible.",
             "start": {"dateTime": start_time, "timeZone": "Europe/Madrid"},
             "end": {"dateTime": end_time, "timeZone": "Europe/Madrid"},
         }
 
         event = service.events().insert(calendarId="primary", body=event_body).execute()
-        
+
         nueva_disponibilidad = DisponibilidadMedico(
             medico_id=especialista.id,
             fecha=fecha,
             hora_inicio=hora_inicio,
             hora_final=hora_final,
-            is_available=True,
-            google_event_id=event["id"]
+            is_available=True
         )
         db.session.add(nueva_disponibilidad)
         db.session.commit()
@@ -315,14 +354,15 @@ def crear_disponibilidad():
         return jsonify({"msg": "Disponibilidad creada con éxito", "event_id": event["id"]}), 201
     except Exception as e:
         db.session.rollback()
+        print("❌ Error en crear_disponibilidad:", str(e))
         return jsonify({"error": str(e)}), 500
+
 @api.route('/disponibilidad/<int:id>', methods=['PUT'])
 @jwt_required()
 def actualizar_disponibilidad(id):
     try:
         current_user = get_jwt_identity()
         especialista = Especialistas.query.filter_by(user_id=current_user).first()
-
         if not especialista:
             return jsonify({'error': 'No autorizado'}), 403
 
@@ -331,15 +371,19 @@ def actualizar_disponibilidad(id):
             return jsonify({'error': 'Disponibilidad no encontrada'}), 404
 
         data = request.json
-        nueva_fecha = data.get('fecha', disponibilidad.fecha)
-        nueva_hora_inicio = data.get('hora_inicio', disponibilidad.hora_inicio)
-        nueva_hora_final = data.get('hora_final', disponibilidad.hora_final)
+        nueva_fecha = datetime.strptime(data.get('fecha', disponibilidad.fecha.strftime('%Y-%m-%d')), "%Y-%m-%d").date()
+        nueva_hora_inicio = datetime.strptime(data.get('hora_inicio', disponibilidad.hora_inicio.strftime('%H:%M')), "%H:%M").time()
+        nueva_hora_final = datetime.strptime(data.get('hora_final', disponibilidad.hora_final.strftime('%H:%M')), "%H:%M").time()
 
-        credentials = Credentials(data.get("access_token"))
+        google_token = request.headers.get("X-Google-Access-Token")
+        if not google_token:
+            return jsonify({"error": "Token de Google no enviado"}), 400
+
+        credentials = Credentials(google_token)
         service = build("calendar", "v3", credentials=credentials)
 
-        start_time = f"{nueva_fecha}T{nueva_hora_inicio}:00"
-        end_time = f"{nueva_fecha}T{nueva_hora_final}:00"
+        start_time = f"{nueva_fecha}T{nueva_hora_inicio}"
+        end_time = f"{nueva_fecha}T{nueva_hora_final}"
 
         event_body = {
             "start": {"dateTime": start_time, "timeZone": "Europe/Madrid"},
@@ -360,6 +404,7 @@ def actualizar_disponibilidad(id):
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
 
+
 @api.route('/disponibilidad/<int:id>', methods=['DELETE'])
 @jwt_required()
 def eliminar_disponibilidad(id):
@@ -374,10 +419,21 @@ def eliminar_disponibilidad(id):
         if not disponibilidad or disponibilidad.medico_id != especialista.id:
             return jsonify({'error': 'Disponibilidad no encontrada'}), 404
 
-        credentials = Credentials(request.json.get("access_token"))
-        service = build("calendar", "v3", credentials=credentials)
+        google_event_id = disponibilidad.google_event_id  # ✅ Obtener el ID del evento en Google Calendar
 
-        service.events().delete(calendarId="primary", eventId=disponibilidad.google_event_id).execute()
+        if google_event_id:  # ✅ Solo eliminar si hay un evento asociado en Google Calendar
+            google_token = request.headers.get("X-Google-Access-Token")
+            if not google_token:
+                return jsonify({"error": "Token de Google no enviado"}), 400
+
+            credentials = Credentials(google_token)
+            service = build("calendar", "v3", credentials=credentials)
+
+            try:
+                service.events().delete(calendarId="primary", eventId=google_event_id).execute()
+                print("✅ Evento eliminado en Google Calendar")
+            except Exception as e:
+                print("❌ Error al eliminar en Google Calendar:", str(e))
 
         db.session.delete(disponibilidad)
         db.session.commit()
@@ -386,6 +442,7 @@ def eliminar_disponibilidad(id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 def get_calendar_service_from_token(google_token):
     credentials = Credentials(google_token)
@@ -434,38 +491,32 @@ def cancel_google_event(google_event_id, google_token):
 def agendar_cita():
     try:
         current_user = get_jwt_identity()
+        user = Users.query.get(current_user)
         data = request.get_json()
-
-        # Validar que se reciba el token de Google
+        
         google_token = request.headers.get("X-Google-Access-Token")
         if not google_token:
-            return jsonify({"error": "Token de Google (access_token) no enviado"}), 400
-
-        # Crear evento en Google Calendar
-        google_event_id = create_google_event(data, google_token)
-
+            google_token, error = refresh_google_token(user)
+            if error:
+                return jsonify({"error": "No se pudo refrescar el token de Google", "details": error}), 400
         
-        estado = data.get("estado", "confirmada").strip().lower()
-
-       
-
-        # Guardar cita en la base de datos
+        google_event_id = create_google_event(data, google_token)
+        
         nueva_cita = Citas(
-            paciente_id=current_user,                   
-            medico_id=data.get("medico_id"),            
-            appointment_date=data.get("appointment_date"),  
+            paciente_id=current_user,
+            medico_id=data.get("medico_id"),
+            appointment_date=data.get("appointment_date"),
             appointment_time=data.get("appointment_time"),
-            estado=estado,  
+            estado=data.get("estado", "confirmada").strip().lower(),
             google_event_id=google_event_id
         )
         db.session.add(nueva_cita)
         db.session.commit()
-
+        
         return jsonify({"msg": "Cita agendada con éxito", "google_event_id": google_event_id}), 201
-
+    
     except Exception as e:
         db.session.rollback()
-        print("❌ Error agendando cita:", str(e))
         return jsonify({"error": str(e)}), 500
 
 

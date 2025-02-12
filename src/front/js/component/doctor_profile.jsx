@@ -2,12 +2,16 @@ import React, { useContext, useEffect, useState } from "react";
 import { Context } from "../store/appContext.js";
 import circle_1 from "../../img/Circle.png";
 import doctor_1 from "../../img/doctor5.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { DoctorModal } from "./doctor_edit_information.jsx";
 
 export const Doctor = () => {
     const { store, actions } = useContext(Context);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const navigate = useNavigate();
+    const handleAvailability = () => {
+        navigate("/book_appointment"); 
+    };
 
     useEffect(() => {
         actions.getProfile(); // 🔹 Cargar perfil cuando se monta
@@ -48,6 +52,12 @@ export const Doctor = () => {
                                     <p className="require-data-info">{store.profile.clinica}</p>
                                 </div>
                             )}
+                            {store.profile.direccion_centro_trabajo && (
+                                <div>
+                                    <p className="require-data-title">Address:</p>
+                                    <p className="require-data-info">{store.profile.direccion_centro_trabajo}</p>
+                                </div>
+                            )}
                             {store.profile.numero_colegiatura && (
                                 <div>
                                     <p className="require-data-title">License Number:</p>
@@ -72,10 +82,10 @@ export const Doctor = () => {
                 </div>
 
                 <div className="d-flex content-medical-options">
-                    <Link to="/availability" className="d-flex choose-speci-box text-decoration-none">
+                    <div  className="d-flex choose-speci-box text-decoration-none" onClick={handleAvailability}>
                         <img src={doctor_1} alt="especialista" className="esp-pic" />
                         <p className="select-speciality">Manage Availability</p>
-                    </Link>
+                    </div>
                     <Link to="/" className="comming-s-box text-decoration-none">
                         <h3 className="comming-text">Medical</h3>
                         <h3 className="comming-text">History is</h3>

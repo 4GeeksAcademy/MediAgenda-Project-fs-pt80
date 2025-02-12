@@ -64,6 +64,7 @@ class Pacientes(db.Model):
     def serialize(self):
         return {
             "id": self.id,
+            "user_id": self.user_id,
             "direccion": self.direccion,
             "telefono": self.telefono,
             "genero": self.genero,
@@ -75,11 +76,11 @@ class Especialistas(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     especialidades = db.Column(db.String(255))
-    telefono_oficina = db.Column(db.String(15))
-    clinica = db.Column(db.String(15))
+    telefono_oficina = db.Column(db.String(50))
+    clinica = db.Column(db.String(50))
     numero_colegiatura= db.Column(db.String(9))
-    direccion_centro_trabajo = db.Column(db.String(30))
-    descripcion = db.Column(db.String(200))
+    direccion_centro_trabajo = db.Column(db.String(100))
+    descripcion = db.Column(db.String(300))
 
     #Relacion disponibilidad del medico
     disponibilidad = db.relationship('DisponibilidadMedico', backref='especialistas', lazy=True)
@@ -107,6 +108,7 @@ class DisponibilidadMedico(db.Model):
     hora_inicio = db.Column(db.Time, nullable=False)
     hora_final = db.Column(db.Time, nullable=False)
     is_available = db.Column(db.Boolean, default=True)
+    google_event_id = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
         return f'<DisponibilidadMedico {self.id}>'
@@ -118,7 +120,8 @@ class DisponibilidadMedico(db.Model):
             "fecha": self.fecha,
             "hora_inicio": self.hora_inicio.strftime('%H:%M'),
             "hora_final": self.hora_final.strftime('%H:%M'),
-            "is_available": self.is_available           
+            "is_available": self.is_available,
+            "google_event_id": self.google_event_id,          
         }
 
 class Citas(db.Model):

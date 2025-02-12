@@ -39,11 +39,33 @@ export const DoctorModal = ({ isOpen, onClose }) => {
                     </div>
                     <form onSubmit={handleSubmit}>
                         <div className="modal-body">
-                            <input type="text" className="form-control mb-3" name="telefono_oficina" value={formData.telefono_oficina || ""} onChange={handleChange} placeholder="Teléfono"/>
-                            <input type="text" className="form-control mb-3" name="clinica" value={formData.clinica || ""} onChange={handleChange} placeholder="Clínica"/>
-                            <input type="text" className="form-control mb-3" name="direccion_centro_trabajo" value={formData.direccion_centro_trabajo || ""} onChange={handleChange} placeholder="Dirección"/>
-                            <input type="text" className="form-control mb-3" name="numero_colegiatura" value={formData.numero_colegiatura || ""} onChange={handleChange} placeholder="Número de colegiatura"/>
-                            <input type="text" className="form-control mb-3" name="descripcion" value={formData.descripcion || ""} onChange={handleChange} placeholder="Descripción"/>
+                            <div>
+                                <p>First Name:</p>
+                                <input type="text" className="form-control mb-3" name="nombre" value={formData.nombre || ""} onChange={handleChange} placeholder="First Name"/>
+                            </div>
+                            <div>
+                                <p>Last Name:</p>
+                                <input type="text" className="form-control mb-3" name="apellido" value={formData.apellido || ""} onChange={handleChange} placeholder="Last Name"/>
+                            </div>
+                            <div>
+                                <p>Phone Number:</p>
+                                <input type="text" className="form-control mb-3" name="telefono_oficina" value={formData.telefono_oficina || ""} onChange={handleChange} placeholder="645050920"/>
+                            </div>
+                            <div>
+                                <p>Clinic Name or Office Name:</p>
+                                <input type="text" className="form-control mb-3" name="clinica" value={formData.clinica || ""} onChange={handleChange} placeholder="Country Clinic"/>
+                            </div>
+                            <div>
+                                <p>Address:</p>
+                                <input type="text" className="form-control mb-3" name="direccion_centro_trabajo" value={formData.direccion_centro_trabajo || ""} onChange={handleChange} placeholder="Number 4 of Privet Drive"/>
+                            </div>
+                            <div>
+                                <p>Personal Description:</p>
+                                <input type="text" className="form-control mb-3" name="descripcion" value={formData.descripcion || ""} onChange={handleChange} placeholder="I am Dermatologist...."/>
+                            </div>
+                        
+                            
+                            
                         </div>
                         <div className="modal-footer">
                             <button type="button" className="btn btn-secondary" onClick={onClose}>Cerrar</button>
