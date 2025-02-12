@@ -44,7 +44,7 @@
 
 .btn-appointment {
   display: inline-block;
-  background: linear-gradient(90deg, #3E2F9C, #6445AC); /* Degradado del botón */
+  background:#3E2F9C;
   color: white;
   font-size: 20px;
   font-weight: bold;
@@ -73,7 +73,8 @@
   flex: 1 1 40%;
   max-width: 100%;
   padding: 20px;
-  color: #624af2;
+  color: #3E2F9C;
+  font-family: 'Gantari', sans-serif;;
 }
 
 .hero-text h1 {
@@ -108,7 +109,7 @@
 }
 
 .what-we-do p {
-  color: #624af2;
+  color: #3E2F9C;
   font-family: 'Gantari', sans-serif;
 }
 
@@ -131,7 +132,7 @@
   margin: 0 auto;
   border-radius: 20%;
   overflow: hidden;
-  border: 4px solid #624af2;
+  border: 4px solid #CDC7ED;
 }
 
 .carousel-item img {
@@ -200,7 +201,7 @@
   border-radius: 20px 0 0 20px;
   outline: none;
   font-size: 1rem;
-  font-family: 'Gantari', sans-serif;
+  font-family: 'Alata', sans-serif;
 }
 
 .search-button {
@@ -215,7 +216,7 @@
 }
 
 .custom-color {
-  color: #877EC2;
+  color: white;
 }
 
 /* Medical Suggestions */
@@ -232,11 +233,11 @@
 
 .suggestion {
   font-size: 1.2rem;
-  color: #624af2;
+  color: #3E2F9C;
   margin-top: 20px;
   padding: 20px;
   font-style: italic;
-  font-family: 'Gantari', sans-serif;
+  font-family: 'Alata', sans-serif;
 }
 
 /* Media Queries */
