@@ -1,3 +1,6 @@
+.content-availa-section{
+  padding: 30px 15px 40px 15px;
+}
 .calendar-container {
   display: flex;
   flex-direction: column;
@@ -28,7 +31,7 @@
 .calendar-weekday {
   text-align: center;
   font-weight: bold;
-  color: #6c48b0;
+  color: #6F4CB0;
   font-size: 1rem;
 }
 
@@ -40,7 +43,7 @@
   height: 3rem;
   background-color: #dcd3f0;
   border-radius: 0.5rem;
-  color: #333;
+  color: #3E2F9C;
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.2s ease;
   font-size: 1rem;
@@ -52,13 +55,13 @@
 }
 
 .calendar-day.selected {
-  background-color: #6c48b0;
+  background-color: #6F4CB0;
   color: white;
   font-weight: bold;
 }
 
 .appointment-details {
-  background-color: #6c48b0;
+  background-color: #6F4CB0;
   color: white;
   padding: 1rem;
   border-radius: 0.5rem;
@@ -69,15 +72,18 @@
 
 .appointment-details p {
   margin: 0;
-  font-size: 1rem;
+  font-size: 16px;
+  font-family: 'Gantari', serif;
 }
 
 .time-selector {
-  margin-top: 0.5rem;
+  margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .time-selector label {
-  font-weight: bold;
+  font-weight: 300;
+  font-family: 'Gantari', serif;
 }
 
 .time-selector input {
@@ -86,6 +92,7 @@
   border-radius: 0.25rem;
   border: none;
   font-size: 1rem;
+  
 }
 
 .appointments-list {
@@ -97,24 +104,38 @@
 }
 
 .appointment-item {
-  color: #6c48b0;
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
+  color: #6F4CB0;
+  font-size: 16px;
+  margin-bottom: 12px;
+  font-family: 'Gantari', serif;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.fa-trash.trash {
+  color: #6F4CB0;
+}
+.delete-button.cal-avail{
+  background-color: transparent;
+  border: 1px solid #6F4CB0;
+  border-radius: 8px;
 }
 
+
 .schedule-button {
-  background-color: #6c48b0;
+  background-color: transparent;
   color: white;
   padding: 0.8rem 1.5rem;
-  font-size: 1rem;
-  border: none;
-  border-radius: 0.5rem;
+  font-size: 16px;
+  border: 1px solid #ffff;
+  border-radius: 18px;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  font-family: 'Jost', serif;
 }
 
 .schedule-button:hover {
-  background-color: #563392;
+  background-color: #4C36A2;
 }
 
 @media (max-width: 768px) {

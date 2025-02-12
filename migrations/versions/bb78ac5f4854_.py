@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 78aea026acde
+Revision ID: bb78ac5f4854
 Revises: 
-Create Date: 2025-02-05 19:49:20.057250
+Create Date: 2025-02-10 17:06:24.827720
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '78aea026acde'
+revision = 'bb78ac5f4854'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -64,12 +64,13 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('paciente_id', sa.Integer(), nullable=False),
     sa.Column('medico_id', sa.Integer(), nullable=False),
-    sa.Column('estado', sa.Enum('pendiente', 'disponible', 'cancelado', 'completado', name='status_enum'), nullable=False),
+    sa.Column('estado', sa.Enum('confirmada', 'cancelado', 'completado', name='status_enum'), nullable=False),
     sa.Column('appointment_date', sa.Date(), nullable=False),
     sa.Column('appointment_time', sa.Time(), nullable=False),
     sa.Column('notes', sa.String(length=250), nullable=True),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
+    sa.Column('google_event_id', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['medico_id'], ['especialistas.id'], ),
     sa.ForeignKeyConstraint(['paciente_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id')

@@ -6,13 +6,14 @@
     align-items: center;
     justify-content: center;
     padding: 40px 20px;
-    flex-direction: column; 
+    flex-direction: row;
+    text-align: center;
 }
 
 .text-container {
-    max-width: 1800px;
-    text-align: center; 
-    padding-left: 50px;
+    max-width: 1200px;
+    padding: 0 30px;
+    text-align: left; 
 }
 
 .text {
@@ -22,17 +23,15 @@
 
 .welcome-text {
     font-weight: 600;
-    font-size: 21px
+    font-size: 21px;
 }
 
 .image-container-about {
-    position: relative;
     width: 300px;  
     height: auto; 
     display: flex;
     justify-content: center; 
     align-items: center;
-    margin: 20px 0; 
 }
 
 .image-container-about img {
@@ -40,33 +39,20 @@
     height: auto; 
 }
 
-@media (min-width: 768px) {
-    .about-us-container {
-        flex-direction: row; 
-    }
-
-    .text-container {
-        text-align: left; 
-    }
-
-    .image-container-about {
-        justify-content: flex-end; 
-        margin-left: auto;
-        position: absolute;
-        right: 40px; 
-        top: 50%; 
-        transform: translateY(-35%);
-    }
-}
-
 @media (max-width: 768px) {
-    .text {
+    .about-us-container {
+        flex-direction: column-reverse; 
         text-align: center;
     }
 
+    .text-container {
+        text-align: center;
+        padding: 0 20px;
+    }
+
     .image-container-about {
-        position: static; 
+        position: relative;
         transform: none;
-        margin: 20px auto; 
+        margin-top: 20px; 
     }
 }

@@ -15,9 +15,8 @@ import "../styles/editinformation.css";
 import "../styles/calendar.css"
 import "../styles/about_us.css"
 
-
 import "../styles/home.css";
-
+import "../styles/suppor.css"
 
 //import your own components
 import Layout from "./layout";
@@ -29,3 +28,4 @@ root.render(
     <Layout />
   </React.StrictMode>
 );
+                       
