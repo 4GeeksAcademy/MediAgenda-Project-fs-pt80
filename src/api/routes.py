@@ -23,7 +23,7 @@ SCOPES = ["https://www.googleapis.com/auth/calendar"]
 flow = Flow.from_client_secrets_file(
     CLIENT_SECRET_FILE,
     scopes=SCOPES,
-    redirect_uri="https://glowing-succotash-5g4p4995q9vw2v6q6-3000.app.github.dev"
+    redirect_uri="https://expert-space-waffle-r4rvrxxwg5r63pvp5-3000.app.github.dev"
 )
 
 
@@ -298,8 +298,8 @@ def obtener_disponibilidad():
         if not medico_id:
             return jsonify({"error": "Se requiere un ID de médico"}), 400
 
-        # 🔹 Buscar por el ID correcto en la tabla Especialistas
-        especialista = Especialistas.query.get(medico_id)  
+        # 🔹 Buscar correctamente al especialista usando `user_id`
+        especialista = Especialistas.query.filter_by(user_id=medico_id).first()
 
         if not especialista:
             return jsonify({"error": "Médico no encontrado"}), 404
@@ -310,6 +310,7 @@ def obtener_disponibilidad():
     except Exception as e:
         print("❌ Error en obtener_disponibilidad:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 @api.route('/disponibilidad', methods=['POST'])
 @jwt_required()

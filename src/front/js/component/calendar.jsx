@@ -368,7 +368,7 @@
 //           </div>
 //         )}
 //       </div>
-      
+
 //     </>
 //   );
 // };
@@ -422,7 +422,7 @@
 //         end: new Date(`${slot.fecha}T${slot.hora_final}`),
 //         backgroundColor: "green", 
 //     }));
-    
+
 //     const handleSelectSlot = ({ start }) => {
 //         actions.setSelectedDate(moment(start).format("YYYY-MM-DD"));
 //         actions.setShowForm(true);
