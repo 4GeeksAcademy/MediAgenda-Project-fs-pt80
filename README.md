@@ -63,12 +63,21 @@ And you will see the following message:
 
 Every Github codespace environment will have **its own database**, so if you're working with more people eveyone will have a different database and different records inside it. This data **will be lost**, so don't spend too much time manually creating records for testing, instead, you can automate adding records to your database by editing ```commands.py``` file inside ```/src/api``` folder. Edit line 32 function ```insert_test_data``` to insert the data according to your model (use the function ```insert_test_users``` above as an example). Then, all you need to do is run ```pipenv run insert-test-data```.
 
+### Backend install Auth Goofle packages: 
+`$pipenv install google-api-python-client google-auth google-auth-oauthlib to use google api calendar`
+
 ### Front-End Manual Installation:
 
 -   Make sure you are using node version 14+ and that you have already successfully installed and runned the backend.
 
 1. Install the packages: `$ npm install`
-2. Start coding! start the webpack dev server `$ npm run start`
+2. To use react-big-calendar: `$ rm -rf node_modules package-lock.json` & `$ npm install react@18 react-dom@18`
+3. Start coding! start the webpack dev server `$ npm run start`
+
+### Front-End the packages to use Api Google Calendar:
+`$ npm install gapi-script` 
+`$ npm install googleapis`
+`$ npm install react-big-calendar` 
 
 ## Publish your website!
 
