@@ -48,8 +48,8 @@ export const initGapiClient = async () => {
 
 export const signInWithGoogle = async () => {
     try {
-        await loadGoogleApi();  
-        await initGapiClient(); 
+        await loadGoogleApi();
+        await initGapiClient();
 
         return new Promise((resolve, reject) => {
             const tokenClient = window.google.accounts.oauth2.initTokenClient({
