@@ -1,0 +1,107 @@
+@import url('https://fonts.googleapis.com/css2?family=Alate&family=Jost:wght@400;600&family=Gantari:wght@400;500;600&display=swap');
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    margin: 50px auto;
+    position: relative;
+    overflow: auto;
+    padding: 15px;
+}
+.content-card-login{
+    flex-direction: column;
+}
+
+.login-card {
+    padding: 2rem;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 15px;
+    background-color: rgba(111, 76, 176, 0.33);
+    position: relative;
+}
+
+.login-title {
+    font-family: 'Alate', sans-serif;
+    color: #4a148c;
+    font-size: 34px;
+    text-align: center;
+    /* position: absolute;
+    top: 214px;
+    left: 28%; */
+}
+
+.form-label {
+    color: #3E2F9C;
+    font-size: 16px;
+    margin-bottom: 0.5rem;
+    display: block;
+    font-family: 'Gantari', sans-serif;
+}
+
+.form-control {
+    background-color: transparent;
+    border: 1px solid #4a148c;
+    border-radius: 8px;
+    color: white;
+    font-size: 14px;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 1rem;
+    font-family: 'Gantari', sans-serif;
+}
+
+.form-control::placeholder {
+    color: white;
+    font-size: 15px;
+    font-family: 'Gantari', sans-serif;
+}
+
+.form-control:focus {
+    outline: none;
+    background-color: inherit;
+    border-color: #6f4cb0; 
+    box-shadow: none;
+}
+
+.login-button {
+    background-color: #3E2F9C;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 33%;
+    margin-top: 10px;
+    font-family: 'Jost', sans-serif;
+}
+
+.login-button:hover {
+    opacity: 0.9;
+    transform: scale(1.02);
+    background-color: #3E2F9C;
+}
+
+.register-link {
+    color: #3E2F9C;
+    text-decoration: none;
+    font-family: 'Gantari', sans-serif;
+    font-weight: 600;
+}
+
+
+.forgot-password-link {
+    color: #3E2F9C;
+    text-decoration: none;
+    font-family: 'Gantari', sans-serif;
+}
+
+.register-warning{
+    color: #3E2F9C;
+    text-decoration: none;
+    font-family: 'Gantari', sans-serif;
+}

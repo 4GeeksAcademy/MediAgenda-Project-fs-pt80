@@ -29,6 +29,27 @@ const injectContext = PassedComponent => {
 			 * store, instead use actions, like this:
 			 **/
 			// state.actions.getMessage(); // <---- calling this function from the flux.js actions
+			const store = state.store;
+    		const actions = state.actions;
+			actions.initializeGoogleApi();
+
+			if (store.token) {
+				actions.getProfile().then(() => {
+					const updatedStore = state.store;
+
+					if (updatedStore.user) {
+						if (updatedStore.role === "paciente") {
+							actions.fetchAppointments();
+						} else if (updatedStore.role === "especialista") {
+							actions.fetchAvailability(updatedStore.user.id);
+						}
+					}
+				});
+			}
+			actions.fetchDoctors();
+					
+			
+			
 		}, []);
 
 		// The initial value for the context is not null anymore, but the current state of this component,

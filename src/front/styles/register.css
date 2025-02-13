@@ -1,0 +1,104 @@
+@import url('https://fonts.googleapis.com/css2?family=Alate&family=Jost:wght@400;600&family=Gantari:wght@400;500;600&display=swap');
+
+.doctor-register-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    margin: 50px auto;
+    position: relative;
+    overflow: auto;
+}
+
+.doctor-register-card {
+    padding: 2rem;
+    box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.2);
+    width: 100%;
+    max-width: 600px;
+    border-radius: 15px;
+    background-color: rgba(111, 76, 176, 0.33);
+    position: relative;
+}
+
+.doctor-register-title {
+    font-family: 'Alate', sans-serif;
+    color: #4a148c;
+    font-size: 34px;
+    text-align: center;
+    position: relative;
+    top: 40px;
+    left: -10%;
+    border-radius: 8px;
+}
+
+.doctor-register-label {
+    color: #3E2F9C;
+    font-family: 'Gantari', sans-serif;
+    font-size: 15px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.doctor-register-input {
+    background-color: transparent;
+    font-family: 'Gantari', sans-serif;
+    border: 1px solid #4a148c;
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.doctor-register-input:focus, 
+.doctor-register-select:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: #6f4cb0;
+}
+
+.doctor-register-input::placeholder {
+    font-family: 'Gantari', sans-serif;
+    color: white;
+    font-size: 15px;
+}
+
+.doctor-register-select {
+    background-color: transparent;
+    font-family: 'Gantari', sans-serif;
+    border: 1px solid #4a148c;
+    border-radius: 8px;
+    color: #4a148c;
+    font-size: 15px;
+    padding: 10px;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+option {
+    background-color: rgba(111, 76, 176, 0.33);
+    color: #4a148c;
+}
+
+option:hover {
+    background-color: #4a148c;
+    color: white;
+}
+
+.doctor-register-button {
+    background-color: #3E2F9C;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 20px;
+    color: white;
+    border: none;
+    cursor: pointer;
+    width: 33%;
+    margin-top: 10px;
+    font-family: 'Jost', sans-serif;
+}
+
+.doctor-register-button:hover {
+    opacity: 0.9;
+}

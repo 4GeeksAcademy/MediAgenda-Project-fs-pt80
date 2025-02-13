@@ -1,0 +1,263 @@
+body {
+  font-family: 'gantari', sans-serif;
+  background-color: rgba(205, 199, 237, 0.25);
+}
+
+.appointment-calendar-container {
+  font-family: 'gantari', sans-serif;
+  width: 600px;
+  max-width: 97%;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #f9f9fb;
+  border-radius: 1rem;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.appointment-search-bar {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  width: 500px;
+  max-width: 93%;
+}
+
+.appointment-search-input {
+  flex: 1;
+  padding: 0.8rem;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.appointment-search-button {
+  background-color: #6c48b0;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0 0.5rem 0.5rem 0;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.appointment-search-button:hover {
+  background-color: #563392;
+}
+
+.appointment-carousel {
+  background-color: #dcd3f0;
+  border-radius: 0.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1.5rem;
+  width: 500px;
+  max-width: 93%;
+}
+
+.appointment-carousel-arrow {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: #6c48b0;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  width: 50%;
+  max-width: 80%;
+  height: 100px;
+}
+
+.appointment-carousel-arrow:hover {
+  transform: scale(1.2);
+}
+
+.appointment-carousel-item {
+  margin: 0 1rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #6c48b0;
+  text-align: center;
+}
+
+.appointment-specialty-doctors {
+  width: 500px;
+  max-width: 90%;
+  margin-bottom: 2rem;
+}
+
+.appointment-specialty-doctors ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.appointment-doctor-item {
+  padding: 1rem;
+  background-color: #dcd3f0;
+  color: #6c48b0;
+  border-radius: 0.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.appointment-doctor-item:hover {
+  background-color: #b9a6e3;
+  transform: scale(1.05);
+}
+
+.appointment-doctor-item.selected {
+  background-color: #6c48b0;
+  color: white;
+  font-weight: bold;
+}
+
+.appointment-calendar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+.appointment-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.appointment-calendar-weekday {
+  text-align: center;
+  font-weight: bold;
+  color: #6c48b0;
+  font-size: 1rem;
+}
+
+.appointment-calendar-day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 3rem;
+  height: 3rem;
+  background-color: #dcd3f0;
+  border-radius: 0.5rem;
+  color: #333;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  font-size: 1rem;
+}
+
+.appointment-calendar-day:hover {
+  background-color: #b9a6e3;
+  transform: scale(1.1);
+}
+
+.appointment-calendar-day.selected {
+  background-color: #6c48b0;
+  color: white;
+  font-weight: bold;
+}
+
+.appointment-details-container {
+  margin-top: 1rem;
+  background-color: #6c48b0;
+  color: white;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  text-align: center;
+  width: 100%;
+}
+
+.appointment-time-selector {
+  margin-top: 0.5rem;
+}
+
+.appointment-schedule-button {
+  margin-top: 1rem;
+  background-color: #6c48b0;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.appointment-schedule-button:hover {
+  background-color: #563392;
+}
+
+.appointment-list {
+  width: 100%;
+  background-color: #f3f0fa;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.appointment-list-item {
+  color: #6c48b0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .appointment-calendar-grid {
+    gap: 0.4rem;
+  }
+
+  .appointment-calendar-day {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.9rem;
+  }
+
+  .appointment-details-container,
+  .appointment-list {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .appointment-calendar-container {
+    padding: 1rem;
+  }
+
+  .appointment-calendar-day {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.8rem;
+  }
+
+  .appointment-schedule-button {
+    padding: 0.6rem 1.2rem;
+    font-size: 0.9rem;
+  }
+}
+
+
+.available-date {
+  background-color: #ffdd57 !important;
+  border-radius: 50%;
+}
+.patient-calendar-container {
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+.alert {
+  background-color: #28a745;
+  color: white;
+  padding: 10px;
+  margin: 10px auto;
+  width: 50%;
+  border-radius: 5px;
+  font-weight: bold;
+  text-align: center;
+}

@@ -1,0 +1,76 @@
+body {
+  font-family: 'Gantari', sans-serif;
+}
+
+.support-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100vh;
+  padding: 40px;
+  background-color: #CDC7ED;
+}
+
+.form-box {
+  background-color: #9f86c0;
+  border-radius: 15px;
+  margin-left: 20%;
+  padding: 30px;
+  width: 550px;
+  box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.form-box label {
+  display: block;
+  font-weight: bold;
+  color: #4a2569;
+  margin-bottom: 5px;
+}
+
+.form-box input,
+.form-box textarea {
+  width: 100%;
+  padding: 8px;
+  margin-bottom: 15px;
+  border-radius: 5px;
+  border: 1px solid #7d5ba6;
+  background-color: #e0d3f0;
+}
+
+.form-box input:disabled {
+  background-color: #e0d3f0;
+  color: #6b5b95;
+}
+
+.form-box button {
+  background-color: #2e1a64;
+  color: #e0d3f0;
+  padding: 10px;
+  width: 100px;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  display: block;
+  margin-left: auto;
+}
+
+.form-box button:hover {
+  background-color: #241254;
+}
+
+.mobile-preview {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mobile-frame {
+  transform: translateX(70px);
+}
+
+.mobile-frame img {
+  width: 380px;
+  height: 420px;
+}

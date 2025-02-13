@@ -1,0 +1,58 @@
+.about-us-container {
+    background-color: #EEE6FB; 
+    color: #3D1B81;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    flex-direction: row;
+    text-align: center;
+}
+
+.text-container {
+    max-width: 1200px;
+    padding: 0 30px;
+    text-align: left; 
+}
+
+.text {
+    font-size: 21px;
+    line-height: 1.6;
+}
+
+.welcome-text {
+    font-weight: 600;
+    font-size: 21px;
+}
+
+.image-container-about {
+    width: 300px;  
+    height: auto; 
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+}
+
+.image-container-about img {
+    width: 100%; 
+    height: auto; 
+}
+
+@media (max-width: 768px) {
+    .about-us-container {
+        flex-direction: column-reverse; 
+        text-align: center;
+    }
+
+    .text-container {
+        text-align: center;
+        padding: 0 20px;
+    }
+
+    .image-container-about {
+        position: relative;
+        transform: none;
+        margin-top: 20px; 
+    }
+}

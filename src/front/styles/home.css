@@ -5,3 +5,330 @@
     one more css for each page that will contain the selected used 
     on that page only (the ones not reused in other pages).
 */
+/* @import url('https://fonts.googleapis.com/css2?family=Alata&family=Gantari&family=Jost:wght@400;700&display=swap'); */
+
+.home_body {
+  /*padding: 20px;*/
+  font-family: 'Gantari', sans-serif;
+  overflow-x: hidden;
+}
+
+
+
+/*Sección Principal*/
+
+/* Hero Section */
+
+.hero-section {
+  background-color: #CDC7ED;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cuadrado {
+  width: 287px;
+  height: 78%;
+  position: absolute;
+  z-index: 0;
+  right: 0;
+  background: linear-gradient(#3E2F9C, #553CA9, #6445AC);
+}
+.container-first-section{
+  padding: 40px 15px 50px;
+}
+
+.btn-appointment {
+  background: #3E2F9C;
+    color: white;
+    font-size: 20px;
+    font-weight: 300;
+    padding: 18px;
+    border-radius: 25px;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease-in-out;
+    font-family: 'Jost', sans-serif;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-appointment:hover {
+  transform: scale(1.05);
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  z-index: 1;
+  position: relative;
+  left: 65px;
+}
+
+.hero-text {
+  flex: 1 1 40%;
+  /* max-width: 100%; */
+  /* padding: 20px; */
+  color: #3E2F9C;
+  font-family: 'Gantari', sans-serif;;
+}
+
+.hero-text h1 {
+  font-size: 2.5rem;
+  color: #3e2f9c;
+  font-family: 'Alata', sans-serif;
+}
+
+.hero-image img {
+  max-width: 100%;
+  height: auto;
+  z-index: 1;
+}
+
+/* What do we do? */
+.content-w-w-d{
+  padding: 30px 15px 40px;
+}
+.what-we-do {
+  text-align: center;
+  padding: 20px;
+}
+
+.what-we-do h2 {
+  margin-bottom: 20px;
+  color: #3e2f9c;
+  font-family: 'Alata', sans-serif;
+  font-size: 34px;
+}
+
+.what-we-do p {
+  color: #3E2F9C;
+  font-family: 'Gantari', sans-serif;
+}
+.big-text-what-we-do{
+  width: 100%;
+  padding: 15px;
+}
+.big-text-what-we-do{
+  text-align: justify;
+}
+
+/* Carousel */
+.professional-slide {
+  padding: 40px 20px;
+  margin: 40px auto;
+  max-width: 1200px;
+  border-radius: 15px;
+}
+
+.carousel-item {
+  padding: 20px;
+  text-align: center;
+}
+
+.image-container {
+  width: 300px;
+  height: 300px;
+  margin: 0 auto;
+  border-radius: 20%;
+  overflow: hidden;
+  border: 4px solid #CDC7ED;
+}
+
+.carousel-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 16px;
+}
+
+.carousel-caption {
+  position: static;
+  padding: 20px 0;
+  color: #3e2f9c;
+}
+
+.carousel-caption h5 {
+  font-size: 1.5rem;
+  color: #3e2f9c;
+  margin: 15px 0;
+  font-family: 'Alata', sans-serif;
+}
+
+.carousel-caption p {
+  color: #553CA9;
+  font-size: 1rem;
+  font-family: 'Gantari', sans-serif;
+}
+
+/* Controles de navegación */
+.carousel-control-prev,
+.carousel-control-next {
+  width: 5%;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+  filter: invert(30%) sepia(90%) saturate(1500%) hue-rotate(230deg);
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+
+
+/* Find Your Doctor */
+.find-doctor {
+  text-align: center;
+  padding: 40px;
+}
+
+.find-doctor h2 {
+  font-size: 34px;
+  color: #3e2f9c;
+  font-family: 'Alata', sans-serif;
+}
+
+.search-bar {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.search-input {
+  width: 50%;
+  padding: 10px;
+  border: 2px solid #CDC7ED;
+  background-color: #CDC7ED;
+  border-radius: 20px 0 0 20px;
+  outline: none;
+  font-size: 1rem;
+  font-family: 'Alata', sans-serif;
+  color: #3e2f9c;
+}
+.search-input::placeholder{
+  color: rgba(62, 47, 156, 0.66);
+}
+
+.search-button {
+  width: 5%;
+  padding: 12px 20px;
+  background-color: #3e2f9c;
+  border: none;
+  border-radius: 0 20px 20px 0;
+  cursor: pointer;
+  font-size: 1rem;
+  font-family: 'Jost', sans-serif;
+}
+
+.custom-color {
+  color: white;
+}
+
+/* Medical Suggestions */
+.medical-suggestions {
+  text-align: center;
+  padding: 40px;
+  
+}
+
+.medical-suggestions h2 {
+  font-size: 1.8rem;
+  color: #3e2f9c;
+  font-family: 'Alata', sans-serif;
+}
+
+.suggestion {
+  font-size: 1.2rem;
+  color: rgba(62, 47, 156, 0.7);
+  margin-top: 20px;
+  padding: 20px;
+  font-family: 'Alata', sans-serif;
+}
+.doctor-h-name{
+  font-family: 'Gantari', serif;
+  font-size: 18px;
+}
+
+/* Media Queries */
+@media (max-width: 768px) {
+  .hero-section {
+    flex-direction: column;
+  }
+
+  .hero-text,
+  .hero-image {
+    padding: 10px;
+  }
+
+  .carousel {
+    flex-direction: column;
+  }
+
+  .find-doctor {
+    padding: 20px;
+  }
+
+  .medical-suggestions {
+    padding: 20px;
+  }
+  .cuadrado{
+    display: none;
+  }
+  .hero-image img{
+    display: none;
+  } 
+  .content-w-w-d{
+    padding: 15px 20px 15px 30px;
+  }
+  .what-we-do{
+    padding:30px 0 0 0;
+  }
+}
+
+@media (min-width: 1220px){
+  .cuadrado{
+    height: 53%;
+  }
+}
+@media (min-width: 1100px){
+  .cuadrado{
+    height: 70%;
+  }
+}
+@media (min-width: 1280px){
+  .cuadrado{
+    height: 53%;
+  }
+}
+@media (min-width: 1120px){
+  .cuadrado{
+    height: 69.9%;
+  }
+}
+@media (min-width: 1138px){
+  .cuadrado{
+    height: 60.1%;
+  }
+}
+@media (min-width: 800px){
+  .cuadrado{
+    height: 45.8%;
+  }
+}
+@media (min-width: 1024px){
+  .cuadrado{
+    height: 34.3%;
+  }
+}
+@media (min-width: 853px){
+  .cuadrado{
+    height: 42.2%;
+  }
+}
+
+
