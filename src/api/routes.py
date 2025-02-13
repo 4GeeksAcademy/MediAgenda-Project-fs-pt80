@@ -125,7 +125,7 @@ def profile():
         if not user:
             return jsonify({"error": "Usuario no encontrado"}), 404
 
-        # ✅ OBTENER PERFIL (GET)
+       
         if request.method == 'GET':
             if user.paciente:
                 patient_profile = Pacientes.query.filter_by(user_id=user.id).first()
@@ -173,7 +173,7 @@ def profile():
             if not data:
                 return jsonify({"error": "No se enviaron datos"}), 400
 
-            # 🔹 Actualizar datos generales del usuario
+         
             user.nombre = data.get("nombre", user.nombre)
             user.apellido = data.get("apellido", user.apellido)
             user.email = data.get("email", user.email)
@@ -200,7 +200,7 @@ def profile():
                 specialist_profile.descripcion = data.get("descripcion") or specialist_profile.descripcion
                 specialist_profile.especialidades = data.get("especialidades") or specialist_profile.especialidades
 
-            db.session.commit()  # ✅ Solo un commit al final
+            db.session.commit()  
 
             return jsonify({
                 "msg": "Perfil actualizado correctamente",
@@ -210,7 +210,7 @@ def profile():
 
     except Exception as e:
         db.session.rollback()
-        print("❌ Error en profile:", str(e))
+        print("Error en profile:", str(e))
         return jsonify({"error": str(e)}), 500
 
 def refresh_google_token(user):
@@ -298,7 +298,7 @@ def obtener_disponibilidad():
         if not medico_id:
             return jsonify({"error": "Se requiere un ID de médico"}), 400
 
-        # 🔹 Buscar correctamente al especialista usando `user_id`
+        
         especialista = Especialistas.query.filter_by(user_id=medico_id).first()
 
         if not especialista:
@@ -308,7 +308,7 @@ def obtener_disponibilidad():
 
         return jsonify({"disponibilidad": [dispo.serialize() for dispo in disponibilidad]}), 200
     except Exception as e:
-        print("❌ Error en obtener_disponibilidad:", str(e))
+        print("Error en obtener_disponibilidad:", str(e))
         return jsonify({"error": str(e)}), 500
 
 
@@ -355,7 +355,7 @@ def crear_disponibilidad():
         return jsonify({"msg": "Disponibilidad creada con éxito", "event_id": event["id"]}), 201
     except Exception as e:
         db.session.rollback()
-        print("❌ Error en crear_disponibilidad:", str(e))
+        print("Error en crear_disponibilidad:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @api.route('/disponibilidad/<int:id>', methods=['PUT'])
@@ -420,9 +420,9 @@ def eliminar_disponibilidad(id):
         if not disponibilidad or disponibilidad.medico_id != especialista.id:
             return jsonify({'error': 'Disponibilidad no encontrada'}), 404
 
-        google_event_id = disponibilidad.google_event_id  # ✅ Obtener el ID del evento en Google Calendar
+        google_event_id = disponibilidad.google_event_id 
 
-        if google_event_id:  # ✅ Solo eliminar si hay un evento asociado en Google Calendar
+        if google_event_id: 
             google_token = request.headers.get("X-Google-Access-Token")
             if not google_token:
                 return jsonify({"error": "Token de Google no enviado"}), 400
@@ -432,9 +432,9 @@ def eliminar_disponibilidad(id):
 
             try:
                 service.events().delete(calendarId="primary", eventId=google_event_id).execute()
-                print("✅ Evento eliminado en Google Calendar")
+                print("Evento eliminado en Google Calendar")
             except Exception as e:
-                print("❌ Error al eliminar en Google Calendar:", str(e))
+                print("Error al eliminar en Google Calendar:", str(e))
 
         db.session.delete(disponibilidad)
         db.session.commit()
@@ -556,13 +556,13 @@ def list_citas():
                     })
 
             except Exception as e:
-                print("❌ Error obteniendo eventos de Google Calendar:", str(e))
+                print("Error obteniendo eventos de Google Calendar:", str(e))
 
-        # Retornar citas de la BD + eventos de Google Calendar
+       
         return jsonify({"msg": "Citas obtenidas exitosamente", "citas": citas_serializadas + google_events}), 200
 
     except Exception as e:
-        print("❌ Error general en list_citas:", str(e))
+        print("Error general en list_citas:", str(e))
         return jsonify({"error": str(e)}), 500
 
 @api.route('/citas/<string:google_event_id>', methods=['DELETE'])

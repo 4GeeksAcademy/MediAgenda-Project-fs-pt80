@@ -6,27 +6,27 @@ import { signInWithGoogle } from "../component/gapi_auth.jsx";
 
 export const BookAppointment = () => {
     const { store, actions } = useContext(Context);
-    const hasFetchedAvailability = useRef(false); // ✅ Para evitar llamadas repetitivas
+    const hasFetchedAvailability = useRef(false);
 
     useEffect(() => {
         const fetchData = async () => {
             if (store.googleAccessToken && store.token) {
                 console.log("🔄 Intentando cargar el perfil...");
-    
+
                 if (!store.user) {
-                    await actions.getProfile(); // 🔹 Cargar el perfil antes de acceder a user.id
+                    await actions.getProfile();
                 }
-    
+
                 if (store.user && store.user.id && store.role === "especialista") {
                     console.log("🟢 Cargando disponibilidad del médico con ID:", store.user.id);
                     actions.fetchAvailability(store.user.id);
                 } else {
-                    console.warn("⚠️ Usuario no cargado completamente aún:", store.user);
+                    console.warn("Usuario no cargado completamente aún:", store.user);
                 }
             }
         };
         fetchData();
-    }, [store.googleAccessToken, store.token, store.user]); 
+    }, [store.googleAccessToken, store.token, store.user]);
 
     const handleGoogleLogin = async () => {
         const googleToken = await signInWithGoogle();
@@ -40,7 +40,7 @@ export const BookAppointment = () => {
 
     const handleGoogleLogout = () => {
         actions.googleLogOut();
-        hasFetchedAvailability.current = false; // ✅ Resetear para futuras cargas
+        hasFetchedAvailability.current = false;
     };
 
     const handleSelectDay = (day) => {
@@ -51,17 +51,17 @@ export const BookAppointment = () => {
 
     const handleAddAvailability = async (event) => {
         event.preventDefault();
-    
+
         if (!store.user || !store.user.id) {
-            alert("❌ Error: Usuario no cargado. Intenta iniciar sesión nuevamente.");
+            alert("Error: Usuario no cargado. Intenta iniciar sesión nuevamente.");
             return;
         }
-    
+
         if (!store.availabilityStartTime || !store.availabilityEndTime) {
             alert("⚠️ Selecciona un horario válido.");
             return;
         }
-    
+
         const availabilityData = {
             medico_id: store.user.id,
             fecha: store.availabilityDate,
@@ -69,13 +69,13 @@ export const BookAppointment = () => {
             hora_final: store.availabilityEndTime,
             access_token: store.googleAccessToken,
         };
-    
+
         try {
             await actions.createAvailability(availabilityData);
             actions.setAvailabilityShowForm(false);
         } catch (error) {
-            console.error("❌ Error creando disponibilidad:", error);
-            alert("❌ Hubo un error al guardar la disponibilidad.");
+            console.error("Error creando disponibilidad:", error);
+            alert("Hubo un error al guardar la disponibilidad.");
         }
     };
 

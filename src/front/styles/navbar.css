@@ -1,5 +1,6 @@
 .navbar-principal-classes {
   background-color: #CDC7ED;
+  border-bottom: 1px solid #3E2F9C;
 }
 
 .nav-container-items {
@@ -36,7 +37,7 @@
 }
 
 .nav-btn-container {
-  background-color: #3E2F9C;
+  /* background-color: #3E2F9C; */
   padding: 18px 0 0 25px;
   display: flex;
   justify-content: center;

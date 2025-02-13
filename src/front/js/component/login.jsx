@@ -25,13 +25,15 @@ export const Login = () => {
 
     return (
         <div className="login-body">
-            <div className="row">
-                <div className="col-lg-12 col-md-12 col-sm-12">
-                <h2 className="login-title">Login</h2>
+           
+                
+            
+            <div className="d-flex justify-content-center text-start vh-100 content-card-login container">
+                <div>
+                    <h2 className="login-title">Login</h2>
                 </div>
-            </div>
-            <div className="d-flex justify-content-center align-items-center vh-100">
                 <div className="login-container">
+                    
                     <div className="card p-3 shadow-sm login-card">
                         <form onSubmit={handleLogin}>
                             <div className="mb-3">

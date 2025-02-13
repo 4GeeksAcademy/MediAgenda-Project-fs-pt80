@@ -3,8 +3,8 @@ import logo_phone2 from "../../img/logo_phone2.png";
 
 export const AboutUs = () => {
   return (
-    <div className="about-us-container container-fluid">
-      <div className="row justify-content-left align-items-left py-5">
+    <div className="about-us-container">
+      <div className="row justify-content-left align-items-left py-5 container">
         
         <div className="col-12 col-md-6 text-container">
           <p className="text">
@@ -26,7 +26,7 @@ export const AboutUs = () => {
         </div>
 
     
-        <div className="col-12 col-md-6 d-flex justify-content-center mt-4 mt-md-0">
+        <div className="col-12 col-md-6 d-flex justify-content-end">
           <div className="image-container-about">
           <img
           src={logo_phone2}

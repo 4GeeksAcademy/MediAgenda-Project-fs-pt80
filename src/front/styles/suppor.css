@@ -1,6 +1,5 @@
 body {
   font-family: 'Gantari', sans-serif;
-  background-color: rgba(205, 199, 237, 0.25);
 }
 
 .support-container {
@@ -9,7 +8,7 @@ body {
   justify-content: space-between;
   height: 100vh;
   padding: 40px;
-  background-color: #d0c2e8;
+  background-color: #CDC7ED;
 }
 
 .form-box {
