@@ -8,7 +8,7 @@ export const Calendar = () => {
     const { store, actions } = useContext(Context);
     
     useEffect(() => {
-        actions.fetchDoctors();
+        actions.fetchDoctors(); 
     }, []);
 
     useEffect(() => {
