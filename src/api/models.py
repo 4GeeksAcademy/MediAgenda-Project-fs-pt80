@@ -15,16 +15,17 @@ class Users(db.Model):
     password = db.Column(db.String(255), unique=False, nullable=False)
     nombre = db.Column(db.String(50), nullable=False)
     apellido = db.Column(db.String(50), nullable=False)
-    create_at = db.Column(db.DateTime, default=datetime.now)
+    created_at = db.Column(db.DateTime, default=datetime.now)
     updated_at = db.Column(db.DateTime, default=datetime.now, onupdate=datetime)
-    is_active = db.Column(db.Boolean(), unique=False, nullable=False)
+    is_active = db.Column(db.Boolean, default=True, unique=False, nullable=False)
     paciente = db.Column(db.Boolean(), nullable=False)
+    google_refresh_token = db.Column(db.String(255), nullable=True)
     
 
     #relaciones 
     perfil_especialista = db.relationship('Especialistas', backref='users')
     perfil_paciente= db.relationship('Pacientes', backref='users')
-    citas = db.relationship('Citas', backref='users')
+    citas = db.relationship('Citas', backref='users', lazy=True)
 
     def set_password(self, password):
         self.password = generate_password_hash(password)
@@ -42,18 +43,19 @@ class Users(db.Model):
             "email": self.email,
             "nombre": self.nombre,
             "apellido": self.apellido,
-            "create_at": self.create_at,
-            "updated_at": self.updated_at,
+            "created_at": self.created_at.isoformat(),
+            "updated_at": self.updated_at.isoformat(),
             "is_active": self.is_active,
-            "paciente": self.paciente
+            "paciente": self.paciente,
+            "google_refresh_token": self.google_refresh_token
             
         }
 class Pacientes(db.Model):
     __tablename__ = 'pacientes'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
     telefono = db.Column(db.String(16))
-    direccion = db.Column(db.String(40))
+    direccion = db.Column(db.String(100))
     genero = db.Column(db.String(10))
     fecha_nacimiento = db.Column(db.Date)
 
@@ -68,17 +70,17 @@ class Pacientes(db.Model):
             "direccion": self.direccion,
             "telefono": self.telefono,
             "genero": self.genero,
-            "fecha_nacimiento": self.fecha_nacimiento            
+            "fecha_nacimiento": self.fecha_nacimiento.isoformat() if self.fecha_nacimiento else None            
         }
 
 class Especialistas(db.Model):
     __tablename__ = 'especialistas'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
-    especialidades = db.Column(db.String(255))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), unique=True)
+    especialidades = db.Column(db.String(255), default=[])
     telefono_oficina = db.Column(db.String(50))
     clinica = db.Column(db.String(50))
-    numero_colegiatura= db.Column(db.String(9))
+    numero_colegiatura= db.Column(db.String(20))
     direccion_centro_trabajo = db.Column(db.String(100))
     descripcion = db.Column(db.String(300))
 
@@ -107,7 +109,6 @@ class DisponibilidadMedico(db.Model):
     fecha = db.Column(db.Date, nullable=False)
     hora_inicio = db.Column(db.Time, nullable=False)
     hora_final = db.Column(db.Time, nullable=False)
-    is_available = db.Column(db.Boolean, default=True)
     google_event_id = db.Column(db.String(255), nullable=True)
 
     def __repr__(self):
@@ -117,10 +118,9 @@ class DisponibilidadMedico(db.Model):
         return {
             "id": self.id,
             "medico_id": self.medico_id,
-            "fecha": self.fecha,
+            "fecha": self.fecha.isoformat(),
             "hora_inicio": self.hora_inicio.strftime('%H:%M'),
             "hora_final": self.hora_final.strftime('%H:%M'),
-            "is_available": self.is_available,
             "google_event_id": self.google_event_id,          
         }
 
@@ -129,8 +129,7 @@ class Citas(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     paciente_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     medico_id = db.Column(db.Integer, db.ForeignKey('especialistas.id'), nullable=False)
-    estado = db.Column(db.Enum('confirmada', 'cancelado', 'completado', name='status_enum',), 
-        nullable=False)
+    estado = db.Column(db.Enum('confirmada', 'cancelada', 'completada', name='status_enum'), nullable=False)
     appointment_date = db.Column(db.Date, nullable=False)
     appointment_time = db.Column(db.Time, nullable=False)
     notes = db.Column(db.String(250))
@@ -152,8 +151,8 @@ class Citas(db.Model):
             "appointment_date": self.appointment_date.isoformat(),
             "appointment_time": self.appointment_time.strftime('%H:%M'),
             "notes": self.notes,
-            "created_at": self.created_at, 
-            "updated_at": self.updated_at,
+            "created_at": self.created_at.isoformat(), 
+            "updated_at": self.updated_at.isoformat(),
             "google_event_id": self.google_event_id   
         }
 

@@ -2,6 +2,123 @@ body {
   font-family: 'gantari', sans-serif;
   background-color: rgba(205, 199, 237, 0.25);
 }
+/*CSS Calendar*/
+.calendar-appointment {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 10px;
+  padding: 10px;
+  background: transparent;
+}
+.calendar-container-appo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 20px;
+  font-family: 'gantari', sans-serif;
+  background-color: #e8e6f1;
+  padding: 2rem;
+  border-radius: 1rem;
+  width: 100%;
+  max-width: 600px;
+  margin: 2rem auto;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.calendar-header-appo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 350px;
+  margin-bottom: 10px;
+}
+.title-date{
+  font-family: 'Alata', serif;
+  color: #3E2F9C;
+  font-size: 22px;
+  align-self: center;
+}
+
+.calendar-nav-button {
+  background: transparent;
+  color: #3E2F9C;
+  border: 1px solid #3E2F9C;
+  padding: 8px 12px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.calendar-nav-button:hover {
+  background: #3E2F9C;
+  color: #ffff;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+  width: 100%;
+  max-width: 350px;
+}
+
+.calendar-day-name {
+  font-weight: bold;
+  font-family: 'Gantari', serif;
+  text-align: center;
+  padding: 5px;
+  color: #3E2F9C;
+  background-color: transparent;
+  border-radius: 5px;
+}
+
+.calendar-container-appo.calendar-day {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 16px;
+}
+
+.calendar-container-appo .calendar-day:hover {
+  background-color: #6445AC;
+  border: 1px solid #fff;
+  color: #ffff;
+}
+
+.calendar-container-appo .calendar-day.available {
+  background-color: #4C36A2;
+  color: white;
+}
+
+.calendar-container-appo.calendar-day.available:hover {
+  background-color: #3E2F9C;
+  color: #fff;
+}
+
+.calendar-day.selected {
+  background-color: #007bff;
+  color: white;
+}
+
+.calendar-day.empty {
+  visibility: hidden;
+}
+.title-container{
+  display: flex;
+  justify-content: start;
+}
+.title-available{
+  font-family: 'Alata', serif;
+  color: #3E2F9C;
+  font-size: 21px;
+}
 
 .appointment-calendar-container {
   font-family: 'gantari', sans-serif;
@@ -12,6 +129,10 @@ body {
   background-color: #f9f9fb;
   border-radius: 1rem;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+.calendar-title-p{
+  color: #3E2F9C;
+  font-size: 35px;
 }
 
 .appointment-search-bar {
@@ -46,7 +167,7 @@ body {
 }
 
 .appointment-carousel {
-  background-color: #dcd3f0;
+  background-color: #CDC7ED;
   border-radius: 0.5rem;
   display: flex;
   justify-content: center;
@@ -54,6 +175,7 @@ body {
   margin-bottom: 1.5rem;
   width: 500px;
   max-width: 93%;
+  font-family: 'Alata', serif;
 }
 
 .appointment-carousel-arrow {
@@ -81,9 +203,12 @@ body {
 }
 
 .appointment-specialty-doctors {
-  width: 500px;
-  max-width: 90%;
+ 
   margin-bottom: 2rem;
+  justify-content: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 .appointment-specialty-doctors ul {
@@ -93,6 +218,8 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 1rem;
+  width: 500px;
+  max-width: 90%;
 }
 
 .appointment-doctor-item {
@@ -157,6 +284,9 @@ body {
   transform: scale(1.1);
 }
 
+.pat-calendar.calendar-day:hover{
+  color: #fff
+}
 .appointment-calendar-day.selected {
   background-color: #6c48b0;
   color: white;
@@ -179,7 +309,70 @@ body {
 
 .appointment-schedule-button {
   margin-top: 1rem;
-  background-color: #6c48b0;
+  background-color: #3E2F9C;
+  color: white;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: 'Jost', serif;
+}
+
+.appointment-schedule-button:hover {
+  background-color: #4C36A2;
+}
+
+.pat-appointment-list {
+  width: 100%;
+  background-color: rgba(111, 76, 176, 0.25);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+}
+.schedule-list{
+  width: 100%;
+  background-color: rgba(111, 76, 176, 0.53);
+  padding: 1rem;
+  border-radius: 0.5rem;
+  margin-bottom: 1rem;
+  flex-direction: column;
+  align-items: normal;
+  justify-content: space-between;
+}
+
+.appointment-list-item {
+  color: #6c48b0;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.cal-delete-button{
+  margin-top: 1rem;
+  background-color: transparent;
+  color: #3E2F9C;
+  padding: 0.8rem 1.5rem;
+  font-size: 1rem;
+  border: 1px solid #3E2F9C;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  font-family: 'Jost', serif;
+}
+.cal-delete-button:hover {
+  background-color: #4C36A2;
+  color: #ffff;
+}
+.content-login-google{
+  display: flex;
+  justify-content: start;
+  margin-bottom: 40px;
+
+}
+
+.login-google{
+  margin-top: 1rem;
+  background-color: #3E2F9C;
   color: white;
   padding: 0.8rem 1.5rem;
   font-size: 1rem;
@@ -188,23 +381,32 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease;
 }
-
-.appointment-schedule-button:hover {
-  background-color: #563392;
+.login-google:hover{
+  background-color: #4C36A2;
 }
-
-.appointment-list {
-  width: 100%;
-  background-color: #f3f0fa;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  margin-bottom: 1rem;
+.content-logout-google{
+  display: flex;
+  justify-content: start;
+  margin-bottom: 40px;
 }
-
-.appointment-list-item {
-  color: #6c48b0;
+.google-logout{
+  margin-top: 1rem;
+  background-color: #3E2F9C;
+  color: white;
+  padding: 0.8rem 1.5rem;
   font-size: 1rem;
-  margin-bottom: 0.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+.google-logout{
+  background-color: #4C36A2;
+}
+.no-appointment-msg{
+  font-family: 'Gantari', serif;
+  color: #ffff;
+  font-size: 17px;
 }
 
 @media (max-width: 768px) {
@@ -260,4 +462,43 @@ body {
   border-radius: 5px;
   font-weight: bold;
   text-align: center;
+}
+.calendar-day {
+  padding: 10px;
+  text-align: center;
+  cursor: pointer;
+}
+
+
+.doctor-schedule{
+  margin: 5px 0;
+  font-size: 17px;
+  color: #6445AC;
+  margin-bottom: 12px;
+  font-family: 'Gantari', serif;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.book-appointment-item {
+  margin: 5px 0;
+  font-size: 17px;
+  color: #fff;
+  margin-bottom: 12px;
+  font-family: 'Gantari', serif;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.schedule-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.schedule-button:hover {
+  background-color: #45a049;
 }

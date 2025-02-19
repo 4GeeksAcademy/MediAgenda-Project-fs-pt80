@@ -96,17 +96,13 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const googleToken = await signInWithGoogle();
                     if (googleToken) {
                         getActions().saveGoogleToken(googleToken);
-                        await getActions().getProfile(); //
+                        await getActions().getProfile(); 
 
                         const store = getStore();
                         console.log("Usuario después de getProfile():", store.user);
 
-                        if (store.user && store.user.id) {
-                            if (store.user.paciente) {
-                                await getActions().fetchAppointments();
-                            } else {
-                                await getActions().fetchAvailability(store.user.id);
-                            }
+                        if (store.user && store.user.id && !store.user.paciente) {
+                            await getActions().fetchAvailability(store.user.id);
                         } else {
                             console.error("Usuario no cargado correctamente en store.user");
                         }
@@ -116,13 +112,13 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
-
             fetchDoctors: async () => {
+                const token = localStorage.getItem("token");
                 try {
                     console.log("Cargando lista de médicos...");
-                    const resp = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
+                    const resp = await fetch(`${process.env.BACKEND_URL}/api/doctors`, {
                         method: "GET",
-                        headers: { Authorization: `Bearer ${getStore().token}` },
+                        headers: { Authorization: `Bearer ${token}` },
                     });
 
                     if (!resp.ok) throw new Error(`Error obteniendo médicos: ${resp.statusText}`);
@@ -130,15 +126,14 @@ const getState = ({ getStore, getActions, setStore }) => {
                     const data = await resp.json();
                     console.log("Médicos cargados:", data.doctors);
 
-                    if (data.doctors.length === 0) {
-                        console.warn("No hay médicos en la base de datos.");
-                    }
-
-                    setStore({ doctors: data.doctors });
+                    setStore({ doctors: Array.isArray(data.doctors) ? data.doctors : [] });
                 } catch (error) {
                     console.error("Error al cargar médicos:", error);
+                    setStore({ doctors: [] });
                 }
             },
+            
+            
             setNextSpeciality: () => {
                 const store = getStore();
                 const currentIndex = store.specialities.indexOf(store.selectedSpeciality);
@@ -279,24 +274,6 @@ const getState = ({ getStore, getActions, setStore }) => {
                 alert("Sesión cerrada correctamente.");
             },
 
-            fetchDoctors: async () => {
-                try {
-                    console.log("Cargando lista de médicos...");
-                    const resp = await fetch(`${process.env.BACKEND_URL}/api/profile`, {
-                        method: "GET",
-                        headers: { Authorization: `Bearer ${getStore().token}` },
-                    });
-
-                    if (!resp.ok) throw new Error(`Error obteniendo médicos: ${resp.statusText}`);
-
-                    const data = await resp.json();
-                    console.log("Médicos cargados:", data.doctors);
-                    setStore({ doctors: data.doctors });
-                } catch (error) {
-                    console.error("Error al cargar médicos:", error);
-                }
-            },
-
             //Citas 
             setSelectedSpeciality: (increment) => {
                 const store = getStore();
@@ -340,13 +317,12 @@ const getState = ({ getStore, getActions, setStore }) => {
             setSelectedDate: (date) => setStore({ selectedDate: date }),
 
             fetchAppointments: async () => {
-
                 try {
                     const store = getStore();
                     const googleToken = store.googleAccessToken;
                     if (!googleToken) return;
-
-                    console.log("🔄 Obteniendo citas...");
+            
+                   
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
                         method: "GET",
                         headers: {
@@ -354,36 +330,71 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "X-Google-Access-Token": googleToken,
                         },
                     });
-
+            
                     if (!resp.ok) throw new Error("Error obteniendo citas");
+            
                     const data = await resp.json();
-                    setStore({ appointments: data.citas });
+            
+                    const citasFiltradas = data.citas.filter(appt => 
+                        appt.google_event_id && !appt.google_event_id.includes("_")
+                    );
+            
+                   
+                    const citasConDoctor = citasFiltradas.map(appt => ({
+                        ...appt,
+                        doctor: store.doctors.find(doc => doc.id === appt.medico_id) || {}
+                    }));
+            
+                  
+                    const citasUnicas = [];
+                    citasConDoctor.forEach(cita => {
+                        if (!citasUnicas.some(c => c.google_event_id === cita.google_event_id)) {
+                            citasUnicas.push(cita);
+                        }
+                    });
+            
+                  
+                    setStore({ appointments: citasUnicas });
+            
+                   
                 } catch (error) {
                     console.error("Error en fetchAppointments:", error);
                 }
             },
+            
+            
 
             createAppointment: async (appointmentData) => {
                 try {
                     const store = getStore();
                     let googleToken = store.googleAccessToken;
-
+            
+                  
                     if (!googleToken) {
-                        console.log("Intentando refrescar el token de Google...");
                         const tokenResp = await fetch(`${process.env.BACKEND_URL}/api/refresh_token`, {
                             method: "GET",
                             headers: { Authorization: `Bearer ${store.token}` },
                         });
-
-                        if (!tokenResp.ok) throw new Error("Error refrescando el token de Google");
-
+            
+                        if (!tokenResp.ok) {
+                            throw new Error("Error refrescando el token de Google");
+                        }
+            
                         const tokenData = await tokenResp.json();
                         googleToken = tokenData.access_token;
                         setStore({ googleAccessToken: googleToken });
+            
+                       
                     }
-
+            
+                    
+                    if (!googleToken) {
+                        throw new Error("No se pudo obtener un token válido de Google");
+                    }
+            
                     console.log("📅 Enviando datos de cita:", appointmentData);
-
+            
+                  
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/citas`, {
                         method: "POST",
                         headers: {
@@ -393,24 +404,32 @@ const getState = ({ getStore, getActions, setStore }) => {
                         },
                         body: JSON.stringify(appointmentData),
                     });
-
+            
                     if (!resp.ok) {
                         const errorText = await resp.text();
                         throw new Error(`Error creando cita: ${errorText}`);
                     }
-
-                    console.log("Cita creada con éxito");
+            
+                   
                     await getActions().fetchAppointments();
                 } catch (error) {
-                    console.error("❌ Error en createAppointment:", error);
+                    console.error("Error en createAppointment:", error);
+                    alert(error.message || "Hubo un problema al agendar la cita.");
                 }
             },
-
+            
             cancelAppointment: async (google_event_id) => {
                 try {
-                    console.log("Intentando cancelar cita con ID:", google_event_id);
-
+                               
                     const store = getStore();
+            
+                    
+                    if (!google_event_id || google_event_id.includes("_")) {
+                        console.warn("Este evento no puede ser cancelado desde la app:", google_event_id);
+                        alert("Este evento no puede ser cancelado.");
+                        return;
+                    }
+            
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/citas/${google_event_id}`, {
                         method: "DELETE",
                         headers: {
@@ -418,18 +437,26 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "X-Google-Access-Token": store.googleAccessToken,
                         },
                     });
-
+            
+                    const data = await resp.json();
+            
                     if (!resp.ok) {
-                        const errorText = await resp.text();
-                        throw new Error(`Error cancelando cita: ${errorText}`);
+                        throw new Error(`Error cancelando cita: ${data.error || "Desconocido"}`);
                     }
-
-                    console.log("Cita cancelada con éxito.");
-                    await getActions().fetchAppointments();
+            
+                    console.log("Cita cancelada con éxito:", data.message);
+            
+                    const updatedAppointments = store.appointments.filter(appt => appt.google_event_id !== google_event_id);
+                    setStore({ appointments: updatedAppointments });
+            
+                    alert(data.message || "Cita cancelada correctamente.");
                 } catch (error) {
                     console.error("Error en cancelAppointment:", error);
+                    alert(error.message || "No se pudo cancelar la cita.");
                 }
             },
+            
+            
 
             //Manejo disponibilidad
             setAvailabilityDate: (date) => setStore({ availabilityDate: date }),
@@ -438,13 +465,12 @@ const getState = ({ getStore, getActions, setStore }) => {
             setAvailabilityShowForm: (value) => setStore({ availabilityShowForm: value }),
 
             fetchAvailability: async (medico_id) => {
-                console.log("🔍 Solicitando disponibilidad para medico_id:", medico_id);
                 if (!medico_id) {
-                    console.error("❌ Error: medico_id es indefinido.");
+                    console.error("Error: medico_id es indefinido.");
                     return;
                 }
 
-                console.log(`🔄 Intentando obtener disponibilidad con medico_id: ${medico_id}`);
+                console.log(`Intentando obtener disponibilidad con medico_id: ${medico_id}`);
 
                 try {
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad?medico_id=${medico_id}`, {
@@ -461,13 +487,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     }
 
                     const data = await resp.json();
-                    // console.log("Respuesta completa de la API:", data);
-
-                    // console.log("Disponibilidad obtenida:", data.disponibilidad);
-                    // console.log("Médico seleccionado:", store.selectedDoctor);
-
-
-                    setStore({ availability: [...data.disponibilidad] });
+                    setStore({ availability: data.disponibilidad || [] });
                 } catch (error) {
                     console.error("Error en fetchAvailability:", error);
                     alert("Error cargando la disponibilidad.");
@@ -475,8 +495,14 @@ const getState = ({ getStore, getActions, setStore }) => {
             },
 
 
+
             createAvailability: async (availabilityData) => {
                 try {
+                    if (!availabilityData.medico_id) {
+                        console.error("Error: medico_id no definido en availabilityData.");
+                        return;
+                    }
+
                     console.log("Enviando datos de disponibilidad:", availabilityData);
                     const store = getStore();
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
@@ -501,24 +527,21 @@ const getState = ({ getStore, getActions, setStore }) => {
                 }
             },
 
+
             deleteAvailability: async (id) => {
                 try {
                     const store = getStore();
-                    const token = store.token;
-                    const googleToken = store.googleAccessToken;
-
-                    if (!token || !googleToken) {
-                        alert("Debes iniciar sesión antes de eliminar una disponibilidad.");
+                    if (!store.user || !store.user.id) {
+                        console.error("Error: No se puede eliminar disponibilidad porque store.user no está definido.");
                         return;
                     }
 
                     console.log(`Eliminando disponibilidad con ID: ${id}...`);
-
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad/${id}`, {
                         method: "DELETE",
                         headers: {
-                            Authorization: `Bearer ${token}`,
-                            "X-Google-Access-Token": googleToken,
+                            Authorization: `Bearer ${store.token}`,
+                            "X-Google-Access-Token": store.googleAccessToken,
                             "Content-Type": "application/json"
                         },
                     });
@@ -528,13 +551,10 @@ const getState = ({ getStore, getActions, setStore }) => {
                         throw new Error(`Error al eliminar: ${errorText}`);
                     }
 
-                    console.log("Disponibilidad eliminada correctamente en Google Calendar y base de datos.");
-                    alert("Disponibilidad eliminada correctamente.");
-
+                    console.log("Disponibilidad eliminada correctamente.");
                     await getActions().fetchAvailability(store.user.id);
                 } catch (error) {
                     console.error("Error en deleteAvailability:", error);
-                    alert("Error al eliminar la disponibilidad. Intenta nuevamente.");
                 }
             },
         },

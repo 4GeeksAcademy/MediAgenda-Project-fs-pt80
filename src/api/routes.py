@@ -10,7 +10,7 @@ from datetime import datetime, timedelta, timezone
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import Flow
 from googleapiclient.discovery import build
-from google.oauth2 import service_account
+from google.auth.transport.requests import Request
 import os
 
 api = Blueprint('api', __name__)
@@ -73,12 +73,12 @@ def register():
         else:
             new_specialist = Especialistas(
                 user_id=new_user.id,
-                especialidades=data.get('especialidades', None),
-                telefono_oficina=data.get('telefono_oficina', None),
-                clinica=data.get('clinica', None),
+                especialidades=data.get('especialidades','General'),
+                telefono_oficina=data.get('telefono_oficina', ''),
+                clinica=data.get('clinica', ''),
                 numero_colegiatura=data.get('numero_colegiatura', None),
-                direccion_centro_trabajo=data.get('direccion_centro_trabajo', None),
-                descripcion=data.get('descripcion', None)
+                direccion_centro_trabajo=data.get('direccion_centro_trabajo', ''),
+                descripcion=data.get('descripcion', '')
             )
             db.session.add(new_specialist)
 
@@ -132,28 +132,11 @@ def profile():
                 if not patient_profile:
                     return jsonify({"error": "Perfil de paciente no encontrado"}), 404
 
-                especialistas = db.session.query(Especialistas, Users).join(Users, Especialistas.user_id == Users.id).all()
-
-                doctors_list = [
-                    {
-                        "id": doctor.id,
-                        "nombre": user.nombre,
-                        "apellido": user.apellido,
-                        "especialidades": doctor.especialidades,
-                        "telefono_oficina": doctor.telefono_oficina or "",
-                        "clinica": doctor.clinica or "",
-                        "numero_colegiatura": doctor.numero_colegiatura or "",
-                        "direccion_centro_trabajo": doctor.direccion_centro_trabajo or "",
-                        "descripcion": doctor.descripcion or "",
-                    }
-                    for doctor, user in especialistas
-                ]
 
                 return jsonify({
                     "role": "paciente",
                     "user": user.serialize(),
                     "profile": patient_profile.serialize(),
-                    "doctors": doctors_list
                 }), 200
 
             else:
@@ -181,31 +164,33 @@ def profile():
             if user.paciente:
                 patient_profile = Pacientes.query.filter_by(user_id=user.id).first()
                 if not patient_profile:
-                    return jsonify({"error": "Perfil de paciente no encontrado"}), 404
+                    patient_profile = Pacientes(user_id=user.id) 
+                    db.session.add(patient_profile)
 
-                patient_profile.telefono = data.get("telefono") or patient_profile.telefono
-                patient_profile.direccion = data.get("direccion") or patient_profile.direccion
-                patient_profile.genero = data.get("genero") or patient_profile.genero
-                patient_profile.fecha_nacimiento = data.get("fecha_nacimiento") or patient_profile.fecha_nacimiento
+                patient_profile.telefono = data.get("telefono", patient_profile.telefono)
+                patient_profile.direccion = data.get("direccion", patient_profile.direccion)
+                patient_profile.genero = data.get("genero", patient_profile.genero)
+                patient_profile.fecha_nacimiento = data.get("fecha_nacimiento", patient_profile.fecha_nacimiento)
 
             else:
                 specialist_profile = Especialistas.query.filter_by(user_id=user.id).first()
                 if not specialist_profile:
-                    return jsonify({"error": "Perfil de especialista no encontrado"}), 404
+                    specialist_profile = Especialistas(user_id=user.id, especialidades="General")  
+                    db.session.add(specialist_profile)
 
-                specialist_profile.telefono_oficina = data.get("telefono_oficina") or specialist_profile.telefono_oficina
-                specialist_profile.clinica = data.get("clinica") or specialist_profile.clinica
-                specialist_profile.numero_colegiatura = data.get("numero_colegiatura") or specialist_profile.numero_colegiatura
-                specialist_profile.direccion_centro_trabajo = data.get("direccion_centro_trabajo") or specialist_profile.direccion_centro_trabajo
-                specialist_profile.descripcion = data.get("descripcion") or specialist_profile.descripcion
-                specialist_profile.especialidades = data.get("especialidades") or specialist_profile.especialidades
+                specialist_profile.telefono_oficina = data.get("telefono_oficina", specialist_profile.telefono_oficina)
+                specialist_profile.clinica = data.get("clinica", specialist_profile.clinica)
+                specialist_profile.numero_colegiatura = data.get("numero_colegiatura", specialist_profile.numero_colegiatura)
+                specialist_profile.direccion_centro_trabajo = data.get("direccion_centro_trabajo", specialist_profile.direccion_centro_trabajo)
+                specialist_profile.descripcion = data.get("descripcion", specialist_profile.descripcion)
+                specialist_profile.especialidades = data.get("especialidades", specialist_profile.especialidades)
 
             db.session.commit()  
 
             return jsonify({
                 "msg": "Perfil actualizado correctamente",
                 "user": user.serialize(),
-                "profile": specialist_profile.serialize() if not user.paciente else patient_profile.serialize()
+                "profile": patient_profile.serialize() if user.paciente else specialist_profile.serialize()
             }), 200
 
     except Exception as e:
@@ -213,28 +198,72 @@ def profile():
         print("Error en profile:", str(e))
         return jsonify({"error": str(e)}), 500
 
+@api.route('/doctors', methods=['GET'])
+@jwt_required()
+def get_doctors():
+    try:
+        especialistas = db.session.query(Especialistas, Users).join(Users, Especialistas.user_id == Users.id).all()
+
+        doctors_list = [
+            {
+                "id": doctor.id,
+                "nombre": user.nombre,
+                "apellido": user.apellido,
+                "especialidades": doctor.especialidades.split(","),
+                "telefono_oficina": doctor.telefono_oficina or "",
+                "clinica": doctor.clinica or "",
+                "numero_colegiatura": doctor.numero_colegiatura or "",
+                "direccion_centro_trabajo": doctor.direccion_centro_trabajo or "",
+                "descripcion": doctor.descripcion or "",
+            }
+            for doctor, user in especialistas
+        ]
+
+        return jsonify({"doctors": doctors_list}), 200
+
+    except Exception as e:
+        print("Error en get_doctors:", str(e))
+        return jsonify({"error": str(e)}), 500
+
+
 def refresh_google_token(user):
     try:
         if not user.google_refresh_token:
             return None, "No refresh token available"
         
+        client_id = os.getenv("REACT_APP_CLIENT_ID")
+        client_secret = os.getenv("BACKEND_CLIENT_SECRET")
+
+        if not client_id or not client_secret:
+            return None, "Client ID or Client Secret not set in environment variables"
+
         credentials = Credentials(
             None,
             refresh_token=user.google_refresh_token,
             token_uri="https://oauth2.googleapis.com/token",
-            client_id=os.getenv("REACT_APP_CLIENT_ID"),
-            client_secret=os.getenv("BACKEND_CLIENT_SECRET"),
+            client_id=client_id,
+            client_secret=client_secret,
         )
-        
-        credentials.refresh(request())
-        user.google_access_token = credentials.token 
+
+        credentials.refresh(Request())  # 🔥 Refresca el token
+
+        if not credentials.token:
+            return None, "Failed to refresh Google access token"
+
+        user.google_access_token = credentials.token
+
+        if credentials.refresh_token:  # ✅ Solo actualiza el refresh_token si se recibió uno nuevo
+            user.google_refresh_token = credentials.refresh_token
+
         db.session.commit()
-        
+
         return credentials.token, None
+
     except Exception as e:
+        db.session.rollback()
+        print("❌ Error al refrescar el token de Google:", str(e))
         return None, str(e)
 
-    
 @api.route('/auth/google', methods=['GET'])
 def google_auth():
     auth_url, state = flow.authorization_url(access_type="offline", prompt="consent")
@@ -269,25 +298,7 @@ def google_callback():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-@api.route('/refresh_token', methods=['GET'])
-@jwt_required()
-def refresh_token():
-    try:
-        current_user = get_jwt_identity()
-        user = Users.query.get(current_user)
 
-        if not user:
-            return jsonify({"error": "Usuario no encontrado"}), 404
-        
-        new_token, error = refresh_google_token(user)
-
-        if error:
-            return jsonify({"error": error}), 400
-
-        return jsonify({"access_token": new_token}), 200
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
 
 @api.route('/disponibilidad', methods=['GET'])
 @jwt_required()
@@ -298,15 +309,18 @@ def obtener_disponibilidad():
         if not medico_id:
             return jsonify({"error": "Se requiere un ID de médico"}), 400
 
-        
-        especialista = Especialistas.query.filter_by(user_id=medico_id).first()
+        medico_id = int(medico_id)
 
+        especialista = Especialistas.query.get(medico_id)
+    
         if not especialista:
             return jsonify({"error": "Médico no encontrado"}), 404
 
         disponibilidad = DisponibilidadMedico.query.filter_by(medico_id=especialista.id).all()
 
         return jsonify({"disponibilidad": [dispo.serialize() for dispo in disponibilidad]}), 200
+    except ValueError:
+        return jsonify({"error": "medico_id debe ser un número"}), 400
     except Exception as e:
         print("Error en obtener_disponibilidad:", str(e))
         return jsonify({"error": str(e)}), 500
@@ -326,8 +340,9 @@ def crear_disponibilidad():
         fecha = data['fecha']
         hora_inicio = data['hora_inicio']
         hora_final = data['hora_final']
+        access_token = data.get("access_token")
 
-        credentials = Credentials(data.get("access_token"))
+        credentials =  Credentials(access_token)
         service = build("calendar", "v3", credentials=credentials)
 
         start_time = f"{fecha}T{hora_inicio}:00"
@@ -347,7 +362,7 @@ def crear_disponibilidad():
             fecha=fecha,
             hora_inicio=hora_inicio,
             hora_final=hora_final,
-            is_available=True
+            # is_available=True
         )
         db.session.add(nueva_disponibilidad)
         db.session.commit()
@@ -383,8 +398,8 @@ def actualizar_disponibilidad(id):
         credentials = Credentials(google_token)
         service = build("calendar", "v3", credentials=credentials)
 
-        start_time = f"{nueva_fecha}T{nueva_hora_inicio}"
-        end_time = f"{nueva_fecha}T{nueva_hora_final}"
+        start_time = f"{nueva_fecha}T{nueva_hora_inicio.strftime('%H:%M')}"
+        end_time = f"{nueva_fecha}T{nueva_hora_final.strftime('%H:%M')}"
 
         event_body = {
             "start": {"dateTime": start_time, "timeZone": "Europe/Madrid"},
@@ -528,8 +543,12 @@ def list_citas():
         current_user = get_jwt_identity()
         user = Users.query.get(current_user)
 
-       
-        citas_db = Citas.query.filter_by(paciente_id=current_user).all() if user.paciente else Citas.query.filter_by(medico_id=current_user).all()
+        now = datetime.now().date()
+        citas_db = Citas.query.filter(
+            (Citas.paciente_id == current_user if user.paciente else Citas.medico_id == current_user),
+            Citas.appointment_date >= now
+        ).all()
+
         citas_serializadas = [cita.serialize() for cita in citas_db]
 
         google_token = request.headers.get("X-Google-Access-Token")
@@ -538,32 +557,41 @@ def list_citas():
         if google_token:
             try:
                 service = get_calendar_service_from_token(google_token)
-                now = datetime.now().isoformat() + "Z"
+                start_time = (datetime.now() - timedelta(days=7)).isoformat() + "Z"
+                end_time = (datetime.now() + timedelta(days=30)).isoformat() + "Z"
+
                 events_result = service.events().list(
                     calendarId="primary",
-                    timeMin=now,
+                    timeMin=start_time,
+                    timeMax=end_time,
                     singleEvents=True,
                     orderBy="startTime"
                 ).execute()
 
                 for event in events_result.get("items", []):
-                    google_events.append({
-                        "google_event_id": event.get("id"),
-                        "summary": event.get("summary"),
-                        "start": event["start"].get("dateTime"),
-                        "end": event["end"].get("dateTime"),
-                        "attendees": event.get("attendees", [])
-                    })
+                    google_event_id = event.get("id")
+                    
+                    # 🔥 Verificar si la cita existe en la BD antes de enviarla
+                    cita_en_bd = any(cita["google_event_id"] == google_event_id for cita in citas_serializadas)
+                    
+                    if cita_en_bd:
+                        google_events.append({
+                            "google_event_id": google_event_id,
+                            "summary": event.get("summary"),
+                            "start": event["start"].get("dateTime"),
+                            "end": event["end"].get("dateTime"),
+                            "attendees": event.get("attendees", [])
+                        })
 
             except Exception as e:
                 print("Error obteniendo eventos de Google Calendar:", str(e))
 
-       
         return jsonify({"msg": "Citas obtenidas exitosamente", "citas": citas_serializadas + google_events}), 200
 
     except Exception as e:
         print("Error general en list_citas:", str(e))
         return jsonify({"error": str(e)}), 500
+
 
 @api.route('/citas/<string:google_event_id>', methods=['DELETE'])
 @jwt_required()
@@ -571,22 +599,36 @@ def cancel_cita(google_event_id):
     try:
         current_user = get_jwt_identity()
         user = Users.query.get(current_user)
-        
-        if user.paciente:
-            appointment = Citas.query.filter_by(google_event_id=google_event_id, paciente_id=current_user).first()
-        else:
-            appointment = Citas.query.filter_by(google_event_id=google_event_id, medico_id=current_user).first()
-        if not appointment:
-            return jsonify({"error": "Cita no encontrada"}), 404
+
+        # 🔥 Verificar si la cita existe en la base de datos
+        appointment = Citas.query.filter_by(google_event_id=google_event_id).first()
 
         google_token = request.headers.get("X-Google-Access-Token")
         if not google_token:
             return jsonify({"error": "Token de Google no enviado"}), 400
 
-      
-        if not cancel_google_event(google_event_id, google_token):
-            return jsonify({"error": "Error al cancelar la cita en Google Calendar"}), 500
+        credentials = Credentials(google_token)
+        service = build("calendar", "v3", credentials=credentials)
 
+        # 🔥 Si la cita NO está en la base de datos, intentar eliminarla en Google Calendar
+        if not appointment:
+            try:
+                service.events().delete(calendarId="primary", eventId=google_event_id).execute()
+                print("✅ Cita eliminada de Google Calendar")
+                return jsonify({"message": "Cita eliminada solo de Google Calendar"}), 200
+            except Exception as e:
+                print(f"⚠️ Error eliminando evento en Google Calendar: {str(e)}")
+                return jsonify({"error": "Cita no encontrada en la base de datos y error eliminando en Google Calendar"}), 404
+
+        # 🔥 Intentar eliminar en Google Calendar si la cita existe en la BD
+        try:
+            if appointment.google_event_id:
+                service.events().delete(calendarId="primary", eventId=google_event_id).execute()
+                print("✅ Cita eliminada de Google Calendar")
+        except Exception as e:
+            print(f"⚠️ Error eliminando evento en Google Calendar: {str(e)}")
+
+        # 🔥 Eliminar de la base de datos
         db.session.delete(appointment)
         db.session.commit()
 
