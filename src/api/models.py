@@ -38,6 +38,7 @@ class Users(db.Model):
         return f'<Users {self.email}>'
 
     def serialize(self):
+        especialista = Especialistas.query.filter_by(user_id=self.id).first()
         return {
             "id": self.id,
             "email": self.email,
@@ -47,7 +48,8 @@ class Users(db.Model):
             "updated_at": self.updated_at.isoformat(),
             "is_active": self.is_active,
             "paciente": self.paciente,
-            "google_refresh_token": self.google_refresh_token
+            "google_refresh_token": self.google_refresh_token,
+            "perfil_especialista": especialista.serialize() if especialista else None
             
         }
 class Pacientes(db.Model):

@@ -126,15 +126,18 @@ export const Calendar = () => {
         );
 
         return (
-            <div className="pat-appointment-list">
+            <div className="pat-appointment-list container">
                 <h3 className="title-available">Available hours</h3>
                 {availableSlots.map((slot) => (
-                    <p key={`${slot.fecha}-${slot.hora_inicio}`} className="doctor-schedule">
+                    <div>
+                        <p key={`${slot.fecha}-${slot.hora_inicio}`} className="doctor-schedule">
                         {slot.hora_inicio} - {slot.hora_final}
-                        <button className="appointment-schedule-button" onClick={() => handleReserveAppointment(slot.hora_inicio)}>
-                            Schedule
-                        </button>
-                    </p>
+                            <button className="appointment-schedule-button" onClick={() => handleReserveAppointment(slot.hora_inicio)}>
+                                Schedule
+                            </button>
+                        </p>
+                    </div>
+                    
                 ))}
             </div>
         );
@@ -158,14 +161,14 @@ export const Calendar = () => {
                 )}
 
                 <div className="d-flex justify-content-center">
-                    <div className="appointment-carousel">
+                    <div className="appointment-carousel container">
                         <button className="appointment-carousel-arrow" onClick={handlePrevSpeciality}>&#8592;</button>
                         <div className="appointment-carousel-item active">{store.selectedSpeciality}</div>
                         <button className="appointment-carousel-arrow" onClick={handleNextSpeciality}>&#8594;</button>
                     </div>
                 </div>
 
-                <div className="appointment-specialty-doctors ms-2">
+                <div className="appointment-specialty-doctors container">
                     <ul>
                         {Array.isArray(store.doctors) && store.doctors.length > 0 ? (
                             store.doctors

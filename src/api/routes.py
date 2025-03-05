@@ -311,14 +311,19 @@ def obtener_disponibilidad():
 
         medico_id = int(medico_id)
 
-        especialista = Especialistas.query.get(medico_id)
+        # 🔥 Corregimos la forma en que se busca al especialista
+        especialista = Especialistas.query.filter_by(id=medico_id).first()
     
         if not especialista:
             return jsonify({"error": "Médico no encontrado"}), 404
 
-        disponibilidad = DisponibilidadMedico.query.filter_by(medico_id=especialista.id).all()
+        disponibilidad = DisponibilidadMedico.query.filter_by(medico_id=medico_id).all()
+        
+        if not disponibilidad:
+            return jsonify({"msg": "No hay disponibilidad registrada para este médico."}), 200
 
-        return jsonify({"disponibilidad": [dispo.serialize() for dispo in disponibilidad]}), 200
+        return jsonify([disp.serialize() for disp in disponibilidad]), 200
+    
     except ValueError:
         return jsonify({"error": "medico_id debe ser un número"}), 400
     except Exception as e:
@@ -366,6 +371,7 @@ def crear_disponibilidad():
         )
         db.session.add(nueva_disponibilidad)
         db.session.commit()
+        print(f"✅ Disponibilidad guardada en la BD: {nueva_disponibilidad.serialize()}")
 
         return jsonify({"msg": "Disponibilidad creada con éxito", "event_id": event["id"]}), 201
     except Exception as e:
@@ -571,7 +577,7 @@ def list_citas():
                 for event in events_result.get("items", []):
                     google_event_id = event.get("id")
                     
-                    # 🔥 Verificar si la cita existe en la BD antes de enviarla
+                    
                     cita_en_bd = any(cita["google_event_id"] == google_event_id for cita in citas_serializadas)
                     
                     if cita_en_bd:
