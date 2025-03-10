@@ -202,6 +202,7 @@ const getState = ({ getStore, getActions, setStore }) => {
                     }
 
                     console.log("Perfil guardado en store:", getStore().profile);
+                    console.log("🛠️ ID del especialista:", data.user?.perfil_especialista?.id);
                 } catch (error) {
                     console.error("Error cargando perfil:", error);
                 }
@@ -464,19 +465,24 @@ const getState = ({ getStore, getActions, setStore }) => {
             setAvailabilityEndTime: (time) => setStore({ availabilityEndTime: time }),
             setAvailabilityShowForm: (value) => setStore({ availabilityShowForm: value }),
 
-            fetchAvailability: async (medico_id) => {
+            fetchAvailability: async (medico_id = null) => {
                 const store = getStore();
             
-                // 🚨 Verificar que el medico_id es correcto
+               
                 if (!medico_id) {
-                    medico_id = store.user?.perfil_especialista?.id;
-                    if (!medico_id) {
-                        console.error("⚠️ Error: No se pudo obtener medico_id.");
-                        return;
-                    }
+                    medico_id = store.user?.perfil_especialista?.id || null;
                 }
             
-                console.log(`🔍 Intentando obtener disponibilidad con medico_id: ${medico_id}`);
+                console.log("store.user:", store.user);
+                console.log("store.user.perfil_especialista:", store.user?.perfil_especialista);
+                console.log("ID final obtenido para disponibilidad:", medico_id);
+            
+                if (!medico_id) {
+                    console.error("Error: No se pudo obtener medico_id correcto.");
+                    return;
+                }
+            
+                console.log(`Intentando obtener disponibilidad con medico_id: ${medico_id}`);
             
                 try {
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad?medico_id=${medico_id}`, {
@@ -493,20 +499,20 @@ const getState = ({ getStore, getActions, setStore }) => {
                     }
             
                     const data = await resp.json();
-                    console.log("✅ Disponibilidad obtenida:", data);
+                    console.log("Disponibilidad obtenida:", data);
                     setStore({ availability: data || [] });
             
                 } catch (error) {
-                    console.error("❌ Error en fetchAvailability:", error);
+                    console.error("Error en fetchAvailability:", error);
                     alert("Error cargando la disponibilidad.");
                 }
-            },            
+            },
             
             
             createAvailability: async (availabilityData) => {
                 try {
                     const store = getStore();
-            
+
                     if (!availabilityData.medico_id) {
                         availabilityData.medico_id = store.user?.perfil_especialista?.id;
                         if (!availabilityData.medico_id) {
@@ -514,9 +520,9 @@ const getState = ({ getStore, getActions, setStore }) => {
                             return;
                         }
                     }
-            
+
                     console.log("📅 Enviando datos de disponibilidad:", availabilityData);
-            
+
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad`, {
                         method: "POST",
                         headers: {
@@ -526,37 +532,37 @@ const getState = ({ getStore, getActions, setStore }) => {
                         },
                         body: JSON.stringify(availabilityData),
                     });
-            
+
                     if (!resp.ok) {
                         const errorText = await resp.text();
                         throw new Error(`Error creando disponibilidad: ${errorText}`);
                     }
-            
+
                     const responseData = await resp.json();
                     console.log("✅ Disponibilidad creada en Google Calendar:", responseData);
-            
+
                     // 🔄 Esperar 2 segundos antes de hacer `fetchAvailability()`
                     await new Promise(resolve => setTimeout(resolve, 2000));
                     getActions().fetchAvailability(availabilityData.medico_id);
-            
+
                 } catch (error) {
                     console.error("❌ Error en createAvailability:", error);
                 }
             },
-            
-            
+
+
             deleteAvailability: async (id) => {
                 try {
                     const store = getStore();
                     const medico_id = store.user?.perfil_especialista?.id;
-            
+
                     if (!medico_id) {
                         console.error("⚠️ Error: No se puede eliminar disponibilidad porque perfil_especialista no está definido.");
                         return;
                     }
-            
+
                     console.log(`🗑 Eliminando disponibilidad con ID: ${id}...`);
-            
+
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad/${id}`, {
                         method: "DELETE",
                         headers: {
@@ -565,17 +571,17 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "Content-Type": "application/json"
                         },
                     });
-            
+
                     if (!resp.ok) {
                         const errorText = await resp.text();
                         throw new Error(`Error al eliminar: ${errorText}`);
                     }
-            
+
                     console.log("✅ Disponibilidad eliminada correctamente.");
-                    
+
                     // 🔄 Actualizar disponibilidad después de eliminar
                     await getActions().fetchAvailability(medico_id);
-            
+
                 } catch (error) {
                     console.error("❌ Error en deleteAvailability:", error);
                 }

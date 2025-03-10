@@ -305,13 +305,13 @@ def google_callback():
 def obtener_disponibilidad():
     try:
         medico_id = request.args.get("medico_id")
-
+        print(f"🔍 ID recibido en /api/disponibilidad: {medico_id}") 
         if not medico_id:
             return jsonify({"error": "Se requiere un ID de médico"}), 400
 
         medico_id = int(medico_id)
 
-        # 🔥 Corregimos la forma en que se busca al especialista
+       
         especialista = Especialistas.query.filter_by(id=medico_id).first()
     
         if not especialista:
@@ -323,7 +323,7 @@ def obtener_disponibilidad():
             return jsonify({"msg": "No hay disponibilidad registrada para este médico."}), 200
 
         return jsonify([disp.serialize() for disp in disponibilidad]), 200
-    
+       
     except ValueError:
         return jsonify({"error": "medico_id debe ser un número"}), 400
     except Exception as e:
@@ -372,6 +372,7 @@ def crear_disponibilidad():
         db.session.add(nueva_disponibilidad)
         db.session.commit()
         print(f"✅ Disponibilidad guardada en la BD: {nueva_disponibilidad.serialize()}")
+       
 
         return jsonify({"msg": "Disponibilidad creada con éxito", "event_id": event["id"]}), 201
     except Exception as e:
