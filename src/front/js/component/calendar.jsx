@@ -40,7 +40,7 @@ export const Calendar = () => {
 
     const handleSelectDoctor = (doctorId) => {
         actions.setSelectedDoctor(doctorId);
-        actions.fetchAvailability(doctorId);  // 🔹 Cargar disponibilidad al seleccionar doctor
+        actions.fetchAvailability(doctorId); 
     };
 
     const handleSelectDay = (date) => {

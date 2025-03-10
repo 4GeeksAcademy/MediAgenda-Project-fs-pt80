@@ -7,12 +7,12 @@ import { signInWithGoogle } from "../component/gapi_auth.jsx";
 export const BookAppointment = () => {
     const { store, actions } = useContext(Context);
     const hasFetchedAvailability = useRef(false);
-    const [isDeleting, setIsDeleting] = useState(false); // Nuevo estado para evitar múltiples eliminaciones
+    const [isDeleting, setIsDeleting] = useState(false); 
 
     useEffect(() => {
         const fetchData = async () => {
             if (store.googleAccessToken && store.token) {
-                console.log("🔄 Intentando cargar el perfil...");
+                console.log("Intentando cargar el perfil...");
 
                 if (!store.user) {
                     await actions.getProfile();
@@ -33,12 +33,19 @@ export const BookAppointment = () => {
         const googleToken = await signInWithGoogle();
         if (googleToken) {
             actions.saveGoogleToken(googleToken);
-            await actions.getProfile(); // Asegurar que el perfil se obtiene antes de continuar
+            await actions.getProfile();
+            
             if (store.user?.id) {
-                actions.fetchAvailability(store.user.id);
+                console.log("Usuario autenticado con Google:", store.user);
+                console.log("Token de acceso:", store.googleAccessToken);
+                console.log("Intentando obtener disponibilidad...");
+                actions.fetchAvailability(store.user.perfil_especialista.id);
+            } else {
+                console.error("No se pudo cargar el usuario después de iniciar sesión con Google.");
             }
         }
     };
+    
 
     const handleGoogleLogout = () => {
         actions.googleLogOut();
@@ -53,26 +60,27 @@ export const BookAppointment = () => {
 
     const handleAddAvailability = async (event) => {
         event.preventDefault();
-
-        if (!store.user?.id) {
-            alert("Error: Usuario no cargado. Intenta iniciar sesión nuevamente.");
+    
+        if (!store.user?.perfil_especialista?.id) {
+            alert("Error: No se pudo determinar el ID del especialista. Intenta iniciar sesión nuevamente.");
             return;
         }
-
+    
         if (!store.availabilityStartTime || !store.availabilityEndTime) {
             alert("⚠️ Selecciona un horario válido.");
             return;
         }
-
+    
         const availabilityData = {
-            medico_id: store.user.id,
+            medico_id: store.user.perfil_especialista.id,  // ✅ Siempre usa perfil_especialista.id
             fecha: store.availabilityDate,
             hora_inicio: store.availabilityStartTime,
             hora_final: store.availabilityEndTime,
             access_token: store.googleAccessToken,
         };
-
+    
         try {
+            console.log("📅 Enviando datos de disponibilidad:", availabilityData);
             await actions.createAvailability(availabilityData);
             actions.setAvailabilityShowForm(false);
         } catch (error) {
@@ -82,7 +90,7 @@ export const BookAppointment = () => {
     };
 
     const handleDeleteAvailability = async (id) => {
-        if (isDeleting) return; // Evitar múltiples eliminaciones simultáneas
+        if (isDeleting) return; 
         const isConfirmed = window.confirm("¿Estás seguro de que deseas eliminar esta disponibilidad?");
         if (!isConfirmed) return;
 
@@ -152,7 +160,7 @@ export const BookAppointment = () => {
                                         required
                                     />
                                 </div>
-                                <button type="submit" className="schedule-button">Schedule</button>
+                                <button type="submit" className="schedule-button">Save</button>
                             </form>
                         )}
 
