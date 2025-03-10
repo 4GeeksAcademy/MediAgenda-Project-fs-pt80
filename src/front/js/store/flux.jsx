@@ -467,23 +467,23 @@ const getState = ({ getStore, getActions, setStore }) => {
 
             fetchAvailability: async (medico_id = null) => {
                 const store = getStore();
-            
-               
+
+
                 if (!medico_id) {
                     medico_id = store.user?.perfil_especialista?.id || null;
                 }
-            
+
                 console.log("store.user:", store.user);
                 console.log("store.user.perfil_especialista:", store.user?.perfil_especialista);
                 console.log("ID final obtenido para disponibilidad:", medico_id);
-            
+
                 if (!medico_id) {
                     console.error("Error: No se pudo obtener medico_id correcto.");
                     return;
                 }
-            
+
                 console.log(`Intentando obtener disponibilidad con medico_id: ${medico_id}`);
-            
+
                 try {
                     const resp = await fetch(`${process.env.BACKEND_URL}/api/disponibilidad?medico_id=${medico_id}`, {
                         method: "GET",
@@ -492,23 +492,23 @@ const getState = ({ getStore, getActions, setStore }) => {
                             "X-Google-Access-Token": store.googleAccessToken
                         },
                     });
-            
+
                     if (!resp.ok) {
                         const errorText = await resp.text();
                         throw new Error(`Error obteniendo disponibilidad: ${errorText}`);
                     }
-            
+
                     const data = await resp.json();
                     console.log("Disponibilidad obtenida:", data);
                     setStore({ availability: data || [] });
-            
+
                 } catch (error) {
                     console.error("Error en fetchAvailability:", error);
                     alert("Error cargando la disponibilidad.");
                 }
             },
-            
-            
+
+
             createAvailability: async (availabilityData) => {
                 try {
                     const store = getStore();
