@@ -1,8 +1,8 @@
 """empty message
 
-Revision ID: 62c55e933aba
+Revision ID: 068c9b768b13
 Revises: 
-Create Date: 2025-02-12 17:58:31.250907
+Create Date: 2025-02-24 18:36:20.885436
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '62c55e933aba'
+revision = '068c9b768b13'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -31,10 +31,11 @@ def upgrade():
     sa.Column('password', sa.String(length=255), nullable=False),
     sa.Column('nombre', sa.String(length=50), nullable=False),
     sa.Column('apellido', sa.String(length=50), nullable=False),
-    sa.Column('create_at', sa.DateTime(), nullable=True),
+    sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('updated_at', sa.DateTime(), nullable=True),
     sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('paciente', sa.Boolean(), nullable=False),
+    sa.Column('google_refresh_token', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email')
     )
@@ -44,27 +45,29 @@ def upgrade():
     sa.Column('especialidades', sa.String(length=255), nullable=True),
     sa.Column('telefono_oficina', sa.String(length=50), nullable=True),
     sa.Column('clinica', sa.String(length=50), nullable=True),
-    sa.Column('numero_colegiatura', sa.String(length=9), nullable=True),
+    sa.Column('numero_colegiatura', sa.String(length=20), nullable=True),
     sa.Column('direccion_centro_trabajo', sa.String(length=100), nullable=True),
     sa.Column('descripcion', sa.String(length=300), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('pacientes',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('telefono', sa.String(length=16), nullable=True),
-    sa.Column('direccion', sa.String(length=40), nullable=True),
+    sa.Column('direccion', sa.String(length=100), nullable=True),
     sa.Column('genero', sa.String(length=10), nullable=True),
     sa.Column('fecha_nacimiento', sa.Date(), nullable=True),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('user_id')
     )
     op.create_table('citas',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('paciente_id', sa.Integer(), nullable=False),
     sa.Column('medico_id', sa.Integer(), nullable=False),
-    sa.Column('estado', sa.Enum('confirmada', 'cancelado', 'completado', name='status_enum'), nullable=False),
+    sa.Column('estado', sa.Enum('confirmada', 'cancelada', 'completada', name='status_enum'), nullable=False),
     sa.Column('appointment_date', sa.Date(), nullable=False),
     sa.Column('appointment_time', sa.Time(), nullable=False),
     sa.Column('notes', sa.String(length=250), nullable=True),
@@ -81,7 +84,6 @@ def upgrade():
     sa.Column('fecha', sa.Date(), nullable=False),
     sa.Column('hora_inicio', sa.Time(), nullable=False),
     sa.Column('hora_final', sa.Time(), nullable=False),
-    sa.Column('is_available', sa.Boolean(), nullable=True),
     sa.Column('google_event_id', sa.String(length=255), nullable=True),
     sa.ForeignKeyConstraint(['medico_id'], ['especialistas.id'], ),
     sa.PrimaryKeyConstraint('id')
