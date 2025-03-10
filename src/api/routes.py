@@ -245,14 +245,14 @@ def refresh_google_token(user):
             client_secret=client_secret,
         )
 
-        credentials.refresh(Request())  # 🔥 Refresca el token
+        credentials.refresh(Request())  
 
         if not credentials.token:
             return None, "Failed to refresh Google access token"
 
         user.google_access_token = credentials.token
 
-        if credentials.refresh_token:  # ✅ Solo actualiza el refresh_token si se recibió uno nuevo
+        if credentials.refresh_token: 
             user.google_refresh_token = credentials.refresh_token
 
         db.session.commit()
@@ -261,7 +261,7 @@ def refresh_google_token(user):
 
     except Exception as e:
         db.session.rollback()
-        print("❌ Error al refrescar el token de Google:", str(e))
+        print("Error al refrescar el token de Google:", str(e))
         return None, str(e)
 
 @api.route('/auth/google', methods=['GET'])
@@ -269,6 +269,7 @@ def google_auth():
     auth_url, state = flow.authorization_url(access_type="offline", prompt="consent")
     session["oauth_state"] = state
     return jsonify({"auth_url": auth_url})
+
 
 @api.route('/auth/google/callback', methods=['GET'])
 def google_callback():
@@ -367,11 +368,12 @@ def crear_disponibilidad():
             fecha=fecha,
             hora_inicio=hora_inicio,
             hora_final=hora_final,
+            google_event_id=event["id"]
             # is_available=True
         )
         db.session.add(nueva_disponibilidad)
         db.session.commit()
-        print(f"✅ Disponibilidad guardada en la BD: {nueva_disponibilidad.serialize()}")
+        print(f"Disponibilidad guardada en la BD: {nueva_disponibilidad.serialize()}")
        
 
         return jsonify({"msg": "Disponibilidad creada con éxito", "event_id": event["id"]}), 201
@@ -473,31 +475,65 @@ def get_calendar_service_from_token(google_token):
     return service
 
 def create_google_event(appointment_data, google_token):
-    credentials = Credentials(google_token)
-    service = build("calendar", "v3", credentials=credentials)
-    
-    date_str = appointment_data["appointment_date"]
-    time_str = appointment_data["appointment_time"]
-    start_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
-    end_datetime = start_datetime + timedelta(hours=1) 
-    start_t = start_datetime.isoformat()
-    end_t = end_datetime.isoformat()
-    
-    event = {
-        'summary': appointment_data.get("doctorName", "Cita Médica"),
-        'description': appointment_data.get("description", "Cita agendada desde la aplicación"),
-        'start': {
-            'dateTime': start_t,
-            'timeZone': 'UTC'
-        },
-        'end': {
-            'dateTime': end_t,
-            'timeZone': 'UTC'
-        },
-    }
-    
-    created_event = service.events().insert(calendarId='primary', body=event).execute()
-    return created_event['id']
+    try:
+        credentials = Credentials(google_token)
+        service = build("calendar", "v3", credentials=credentials)
+
+        print("Recibido appointment_data:", appointment_data)
+
+        date_str = appointment_data.get("appointment_date")
+        time_str = appointment_data.get("appointment_time")
+        medico_id = appointment_data.get("medico_id")
+
+        if not date_str or not time_str or not medico_id:
+            print("ERROR: appointment_date, appointment_time o medico_id están vacíos.")
+            return {"error": "Faltan datos de fecha, hora o médico."}
+
+        print("Fecha:", date_str, "| 🕒 Hora:", time_str, "| 🏥 Médico ID:", medico_id)
+
+       
+        medico = Especialistas.query.get(medico_id)
+        doctor_name = "Dr. Desconocido"
+
+        if medico:
+            user = Users.query.get(medico.user_id)  
+            if user:
+                doctor_name = f"Dr. {user.nombre} {user.apellido}"  
+
+        print("Doctor asignado:", doctor_name)
+
+        try:
+            start_datetime = datetime.strptime(f"{date_str} {time_str}", "%Y-%m-%d %H:%M")
+            end_datetime = start_datetime + timedelta(hours=1)
+            start_t = start_datetime.isoformat()
+            end_t = end_datetime.isoformat()
+        except ValueError as e:
+            print("ERROR: Formato de fecha/hora incorrecto:", e)
+            return {"error": "Formato de fecha/hora incorrecto."}
+
+        print("Fecha y hora procesadas correctamente:", start_t, "->", end_t)
+
+        event = {
+            'summary': f"Cita Médica con {doctor_name}",
+            'description': appointment_data.get("description", "Cita agendada desde MediAgenda"),
+            'start': {'dateTime': start_t, 'timeZone': 'Europe/Madrid'},
+            'end': {'dateTime': end_t, 'timeZone': 'Europe/Madrid'},
+        }
+
+        created_event = service.events().insert(calendarId='primary', body=event).execute()
+
+        print("Evento creado con éxito:", created_event)
+        created_event_id = created_event['id']
+        updated_event = service.events().get(calendarId='primary', eventId=created_event_id).execute()
+        print("🔄 Evento sincronizado:", updated_event)
+
+        return created_event['id']
+       
+    except Exception as e:
+        print("ERROR en create_google_event:", str(e))
+        return {"error": str(e)}
+
+
 
 def cancel_google_event(google_event_id, google_token):
     credentials = Credentials(google_token)
@@ -516,8 +552,9 @@ def agendar_cita():
         current_user = get_jwt_identity()
         user = Users.query.get(current_user)
         data = request.get_json()
-        
+
         google_token = request.headers.get("X-Google-Access-Token")
+    
         if not google_token:
             google_token, error = refresh_google_token(user)
             if error:
@@ -607,7 +644,6 @@ def cancel_cita(google_event_id):
         current_user = get_jwt_identity()
         user = Users.query.get(current_user)
 
-        # 🔥 Verificar si la cita existe en la base de datos
         appointment = Citas.query.filter_by(google_event_id=google_event_id).first()
 
         google_token = request.headers.get("X-Google-Access-Token")
@@ -617,25 +653,25 @@ def cancel_cita(google_event_id):
         credentials = Credentials(google_token)
         service = build("calendar", "v3", credentials=credentials)
 
-        # 🔥 Si la cita NO está en la base de datos, intentar eliminarla en Google Calendar
+      
         if not appointment:
             try:
                 service.events().delete(calendarId="primary", eventId=google_event_id).execute()
-                print("✅ Cita eliminada de Google Calendar")
+                print("Cita eliminada de Google Calendar")
                 return jsonify({"message": "Cita eliminada solo de Google Calendar"}), 200
             except Exception as e:
-                print(f"⚠️ Error eliminando evento en Google Calendar: {str(e)}")
+                print(f"Error eliminando evento en Google Calendar: {str(e)}")
                 return jsonify({"error": "Cita no encontrada en la base de datos y error eliminando en Google Calendar"}), 404
 
-        # 🔥 Intentar eliminar en Google Calendar si la cita existe en la BD
+   
         try:
             if appointment.google_event_id:
                 service.events().delete(calendarId="primary", eventId=google_event_id).execute()
-                print("✅ Cita eliminada de Google Calendar")
+                print("Cita eliminada de Google Calendar")
         except Exception as e:
-            print(f"⚠️ Error eliminando evento en Google Calendar: {str(e)}")
+            print(f"Error eliminando evento en Google Calendar: {str(e)}")
 
-        # 🔥 Eliminar de la base de datos
+  
         db.session.delete(appointment)
         db.session.commit()
 
