@@ -18,9 +18,9 @@ export const BookAppointment = () => {
                     await actions.getProfile();
                 }
 
-                if (store.user?.perfil_especialista?.id) {  
-                    console.log("🟢 Cargando disponibilidad del médico con ID:", store.user.perfil_especialista.id);
-                    actions.fetchAvailability(store.user.perfil_especialista.id);  // ✅ ID correcto
+                if (store.user?.perfil_especialista?.id) {
+                    console.log("Cargando disponibilidad del médico con ID:", store.user.perfil_especialista.id);
+                    actions.fetchAvailability(store.user.perfil_especialista.id); 
                 } else {
                     console.error("Error: El usuario no tiene un perfil de especialista registrado.");
                 }
