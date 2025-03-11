@@ -18,7 +18,7 @@ export const Navbar = () => {
 
     const handleNavigation = (path) => {
         navigate(path);
-        setIsOpen(false); // Cierra el menú móvil después de navegar
+        setIsOpen(false);
     };
 
     const isProfilePage = location.pathname === "/profile";
@@ -57,7 +57,7 @@ export const Navbar = () => {
 
     const LoginNav = () => (
         <nav className="navbar navbar-expand-lg navbar-light pt-0 pb-0 navbar-login ">
-            <div className={`d-flex w-100 ${window.innerWidth > 768 ? "container" : ""}`}>
+            <div className={`d-flex w-100 justify-content-between ${window.innerWidth > 768 ? "container" : ""}`}>
                 <Link to="/" className="nav-content-img">
                     <img src={logo} alt="logo" className="nav-logo" />
                 </Link>
@@ -101,7 +101,7 @@ export const Navbar = () => {
 
     const RegisterNav = () => (
         <nav className="navbar navbar-expand-lg navbar-light pt-0 pb-0 navbar-login ">
-            <div className={`d-flex w-100 ${window.innerWidth > 768 ? "container" : ""}`}>
+            <div className={`d-flex w-100 justify-content-between ${window.innerWidth > 768 ? "container" : ""}`}>
                 <Link to="/" className="nav-content-img">
                     <img src={logo} alt="logo" className="nav-logo" />
                 </Link>
@@ -213,7 +213,7 @@ export const Navbar = () => {
 
     const GeneralNavbar = () => (
         <nav className="navbar navbar-expand-lg navbar-light pt-0 pb-0 navbar-principal-classes h-auto">
-            <div className="d-flex w-100">
+            <div className="d-flex w-100 container">
                 <Link to="/" className="nav-content-img">
                     <img src={logo} alt="logo" className="nav-logo" />
                 </Link>

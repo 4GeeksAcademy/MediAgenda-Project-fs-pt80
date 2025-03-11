@@ -145,8 +145,8 @@ export const Calendar = () => {
 
     return (
         <>
-            <div className="content-availa-section">
-                <div className="title-container container">
+            <div className="content-appo-section container">
+                <div className="title-container">
                     <h1 className="calendar-title-p">Schedule an Appointment</h1>
                 </div>
 
@@ -155,58 +155,56 @@ export const Calendar = () => {
                         <button className="login-google" onClick={handleGoogleLogin}>Login with Google</button>
                     </div>
                 ) : (
-                    <div className="content-logout-google container">
-                        <button className="google-logout" onClick={handleGoogleLogout}>Logout with Google</button>
-                    </div>
-                )}
-
-                <div className="d-flex justify-content-center">
-                    <div className="appointment-carousel container">
-                        <button className="appointment-carousel-arrow" onClick={handlePrevSpeciality}>&#8592;</button>
-                        <div className="appointment-carousel-item active">{store.selectedSpeciality}</div>
-                        <button className="appointment-carousel-arrow" onClick={handleNextSpeciality}>&#8594;</button>
-                    </div>
-                </div>
-
-                <div className="appointment-specialty-doctors container">
-                    <ul>
-                        {Array.isArray(store.doctors) && store.doctors.length > 0 ? (
-                            store.doctors
-                                .filter(doctor => doctor.especialidades?.includes(store.selectedSpeciality))
-                                .map(doctor => (
-                                    <li key={doctor.id} className={`appointment-doctor-item ${store.selectedDoctor === doctor.id ? "selected" : ""}`} 
-                                        onClick={() => handleSelectDoctor(doctor.id)}>
-                                        {doctor.nombre} {doctor.apellido}
-                                    </li>
-                                ))
-                        ) : (
-                            <p className="title-available">No doctors available</p>
-                        )}
-                    </ul>
-                </div>
-
-                <div className="calendar-container-appo">
-                    {renderCalendar()}
-                </div>
-
-                {selectedDay && renderAvailableTimes()}
-
-                <div className="schedule-list container">
-                    {store.appointments && store.appointments.length > 0 ? (
-                        store.appointments.map(appt => (
-                            <div className="d-flex justify-content-between align-items-baseline">
-                                <p key={`${appt.google_event_id || appt.id}-${appt.appointment_date}-${appt.appointment_time}`} className="book-appointment-item">
-                                    {appt.appointment_date} {appt.appointment_time} - con Dr./Dra. {appt.doctor?.nombre || "Unknown"} {appt.doctor?.apellido || ""}
-                                </p>
-                                <button className="cal-delete-button" onClick={() => handleCancelAppointment(appt.google_event_id)}>
-                                    Cancel
-                                </button>
+                    <>
+                        <div className="content-logout-google container">
+                            <button className="google-logout" onClick={handleGoogleLogout}>Logout with Google</button>
+                        </div>
+                        <div className="d-flex justify-content-center">
+                            <div className="appointment-carousel container">
+                                <button className="appointment-carousel-arrow" onClick={handlePrevSpeciality}>&#8592;</button>
+                                <div className="appointment-carousel-item active">{store.selectedSpeciality}</div>
+                                <button className="appointment-carousel-arrow" onClick={handleNextSpeciality}>&#8594;</button>
                             </div>
-                        ))
-                    ) : (
-                        <p className="no-appointment-msg">No appointments scheduled</p>
-                    )}
-                </div>
+                        </div>
+                        <div className="appointment-specialty-doctors container">
+                            <ul>
+                                {Array.isArray(store.doctors) && store.doctors.length > 0 ? (
+                                    store.doctors
+                                        .filter(doctor => doctor.especialidades?.includes(store.selectedSpeciality))
+                                        .map(doctor => (
+                                            <li key={doctor.id} className={`appointment-doctor-item ${store.selectedDoctor === doctor.id ? "selected" : ""}`} 
+                                                onClick={() => handleSelectDoctor(doctor.id)}>
+                                                {doctor.nombre} {doctor.apellido}
+                                            </li>
+                                        ))
+                                ) : (
+                                    <p className="title-available">No doctors available</p>
+                                )}
+                            </ul>
+                        </div>
+                        <div className="calendar-container-appo">
+                            {renderCalendar()}
+                        </div>
+                        {selectedDay && renderAvailableTimes()}
+                        <div className="schedule-list container">
+                            {store.appointments && store.appointments.length > 0 ? (
+                                store.appointments.map(appt => (
+                                    <div className="d-flex justify-content-between align-items-baseline">
+                                        <p key={`${appt.google_event_id || appt.id}-${appt.appointment_date}-${appt.appointment_time}`} className="book-appointment-item">
+                                            {appt.appointment_date} {appt.appointment_time} - con Dr./Dra. {appt.doctor?.nombre || "Unknown"} {appt.doctor?.apellido || ""}
+                                        </p>
+                                        <button className="cal-delete-button" onClick={() => handleCancelAppointment(appt.google_event_id)}>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="no-appointment-msg">No appointments scheduled</p>
+                            )}
+                        </div>
+                    </>
+                    
+                )}
             </div>
         </>
     );

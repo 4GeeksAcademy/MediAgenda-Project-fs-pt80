@@ -72,7 +72,7 @@ export const BookAppointment = () => {
         }
     
         const availabilityData = {
-            medico_id: store.user.perfil_especialista.id,  // ✅ Siempre usa perfil_especialista.id
+            medico_id: store.user.perfil_especialista.id, 
             fecha: store.availabilityDate,
             hora_inicio: store.availabilityStartTime,
             hora_final: store.availabilityEndTime,
@@ -80,7 +80,7 @@ export const BookAppointment = () => {
         };
     
         try {
-            console.log("📅 Enviando datos de disponibilidad:", availabilityData);
+            console.log("Enviando datos de disponibilidad:", availabilityData);
             await actions.createAvailability(availabilityData);
             actions.setAvailabilityShowForm(false);
         } catch (error) {
